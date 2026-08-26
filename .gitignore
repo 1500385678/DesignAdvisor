@@ -3,3 +3,24 @@
 node_modules/
 .venv/
 __pycache__/
+
+# 本地环境
+.env
+.env.local
+
+# Next.js 构建产物
+.next/
+out/
+build/
+
+# 数据与缓存
+data/
+*.db
+*.sqlite
+
+# Python
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache//
