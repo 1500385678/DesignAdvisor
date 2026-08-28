@@ -33,7 +33,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-5xl px-6 py-16">
       <header className="mb-12">
         <p className="text-sm uppercase tracking-widest text-accent">
-          DesignAdvisor · v0.1
+          DesignAdvisor · v0.3
         </p>
         <h1 className="mt-3 text-4xl font-semibold leading-tight">
           27-设计-Design Level
@@ -43,6 +43,26 @@ export default function HomePage() {
           调用、可被设计师搜索、可被产品研发引用的统一设计中枢。
         </p>
       </header>
+
+      <section className="mb-10 rounded-2xl border border-accent/30 bg-accent/5 p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-accent">
+              知识库 · Phase 0 #4 前置
+            </p>
+            <h2 className="mt-2 text-xl font-medium">24 条设计哲学</h2>
+            <p className="mt-1 text-sm text-ink-50/60">
+              从 _DesignLib 10 章盘点提炼 · 飞书 bot 查规范的后端数据,Web 端先跑通
+            </p>
+          </div>
+          <Link
+            href="/dp"
+            className="rounded-lg border border-accent/40 bg-accent/20 px-5 py-2.5 text-sm font-medium text-accent transition hover:bg-accent/30"
+          >
+            浏览 24 条 →
+          </Link>
+        </div>
+      </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {modules.map((m) => (
