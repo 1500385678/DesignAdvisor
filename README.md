@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.3(2026-08-29)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.4(2026-08-31)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.4(2026-08-31)· T5 · 新增 `docs/04-可入库资产清单_v0.1.md`,4 类(组件 32 / 页面 19 / 令牌 ~73 / 参考开放)骨架清单对齐 `02-schema` v0.1;Phase 0 #2 闭环,Phase 1 OAuth 后按此清单遍历
 - v0.3(2026-08-29)· T5 · 新增 `app/dp/page.tsx` SSR 浏览页(消费 `GET /api/v1/dp/search?q=` + `?category=`),首页加知识库入口 · Web 端先于飞书 bot 跑通规范查询 UI
 - v0.2(2026-08-28)· T5 · 24 条 DP 真实数据从 `docs/03-` 抽到 `api/main.py` `_DP_CATALOG`,新增 `/api/v1/dp/search?q=` 关键词搜索端点
 - v0.1(2026-08-27)· T5 · 启动 Next.js 14 + FastAPI 最小骨架,Phase 1 前置就位
@@ -25,6 +26,7 @@
 - [[docs/01-设计顾问-技术方案-v1.0]] · v1.0 技术方案存档
 - [[docs/02-设计资产元数据-schema]] · 资产元数据 schema v0.1
 - [[docs/03-_DesignLib盘点_设计哲学清单_v0.1]] · 24 条 DP / 9 条大师名言 / 3 条悖论
+- [[docs/04-可入库资产清单_v0.1]] · 4 类资产骨架(组件 32 / 页面 19 / 令牌 ~73 / 参考开放)
 
 ## 工程基础设施(v0.1,2026-08-27 立)
 
@@ -89,6 +91,6 @@ DesignWeb/
 ```
 
 ## 当前阶段
-- **Phase 0**(资产盘点):3/6 完成(DP 清单 + 元数据 schema + Web 端规范查询)
-- **Phase 1**(MVP):0/6 · 工程骨架已就位,等待 Phase 0 剩余 3 项(Figma 盘点 / OAuth 接入 / 飞书 bot 雏形)
+- **Phase 0**(资产盘点):5/8 完成(DP 清单 / 元数据 schema / 工程骨架 / 24 条 DP 入库 / **可入库资产清单 v0.1**)
+- **Phase 1**(MVP):0/6 · 工程骨架已就位,等待 Phase 0 剩余 3 项(Figma OAuth 接入 / 飞书 bot 雏形最后 20% / 设计师访谈)
 - 详见 [[项目开发计划]]
