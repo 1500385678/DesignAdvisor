@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.4(2026-08-31)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.5(2026-09-01)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.5(2026-09-01)· T5 · Phase 1 #1 资产库 MVP 第一刀:新增 `api/assets.py` 模块(8 件 fake-load 资产,4 类各 2 件),暴露 `GET /api/v1/assets` 列表 + `/summary` 计数 + `/{id}` 详情三端点,字段对齐 `02-schema` v0.1;后端版本 0.2 → 0.3,阶段由 Phase 0 资产盘点进入 Phase 1 资产库 MVP
 - v0.4(2026-08-31)· T5 · 新增 `docs/04-可入库资产清单_v0.1.md`,4 类(组件 32 / 页面 19 / 令牌 ~73 / 参考开放)骨架清单对齐 `02-schema` v0.1;Phase 0 #2 闭环,Phase 1 OAuth 后按此清单遍历
 - v0.3(2026-08-29)· T5 · 新增 `app/dp/page.tsx` SSR 浏览页(消费 `GET /api/v1/dp/search?q=` + `?category=`),首页加知识库入口 · Web 端先于飞书 bot 跑通规范查询 UI
 - v0.2(2026-08-28)· T5 · 24 条 DP 真实数据从 `docs/03-` 抽到 `api/main.py` `_DP_CATALOG`,新增 `/api/v1/dp/search?q=` 关键词搜索端点
@@ -50,7 +51,11 @@ npm start            # 启动生产服务
 - 端点:
   - `GET /healthz` · 健康检查
   - `GET /api/v1/info` · 项目元信息
-  - `GET /api/v1/dp` · 24 条设计哲学清单(占位,Phase 0 落库)
+  - `GET /api/v1/dp` · 24 条设计哲学清单(可按 `?category=` 过滤)
+  - `GET /api/v1/dp/search?q=` · DP 关键词搜索(飞书 bot 用)
+  - `GET /api/v1/assets` · 资产列表(支持 `?kind=` / `?category=` / `?status=` 过滤,Phase 1 #1)
+  - `GET /api/v1/assets/summary` · 4 类资产计数 + 命名空间摘要(Dashboard 用)
+  - `GET /api/v1/assets/{id}` · 单个资产完整元数据
 - CORS 默认白名单 `http://localhost:3000`,通过 `CORS_ORIGINS` 环境变量覆盖
 
 ```bash
@@ -91,6 +96,6 @@ DesignWeb/
 ```
 
 ## 当前阶段
-- **Phase 0**(资产盘点):5/8 完成(DP 清单 / 元数据 schema / 工程骨架 / 24 条 DP 入库 / **可入库资产清单 v0.1**)
-- **Phase 1**(MVP):0/6 · 工程骨架已就位,等待 Phase 0 剩余 3 项(Figma OAuth 接入 / 飞书 bot 雏形最后 20% / 设计师访谈)
+- **Phase 0**(资产盘点):6/9 完成(+ v0.5 资产后端 fake-load 端点,Phase 0 阶段闭环向 Phase 1 推进)
+- **Phase 1**(MVP):0.5/6 · **#1 资产库切第一刀**已落 `api/assets.py` 后端 8 件 fake-load 端点,前端 `app/assets/page.tsx` 列表页待切
 - 详见 [[项目开发计划]]

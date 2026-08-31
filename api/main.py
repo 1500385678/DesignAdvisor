@@ -1,12 +1,15 @@
 """
-DesignAdvisor · FastAPI 后端 v0.2
+DesignAdvisor · FastAPI 后端 v0.3
 
-最小骨架 + 24 条设计哲学真实数据:
-- GET /healthz                    健康检查
-- GET /api/v1/info                项目元信息(版本/阶段/模块清单)
-- GET /api/v1/dp                  24 条设计哲学清单(从 docs/03- 真实落库)
-- GET /api/v1/dp?category=...     按分类过滤(A/B/C/D/E 五类)
-- GET /api/v1/dp/search?q=...     关键词搜索(id/title/source 命中,飞书 bot 用)
+最小骨架 + 24 条设计哲学真实数据 + 8 件资产 fake-load:
+- GET /healthz                       健康检查
+- GET /api/v1/info                   项目元信息(版本/阶段/模块清单)
+- GET /api/v1/dp                     24 条设计哲学清单(从 docs/03- 真实落库)
+- GET /api/v1/dp?category=...        按分类过滤(A/B/C/D/E 五类)
+- GET /api/v1/dp/search?q=...        关键词搜索(id/title/source 命中,飞书 bot 用)
+- GET /api/v1/assets                 资产列表(支持 ?kind / ?category / ?status 过滤)
+- GET /api/v1/assets/summary         4 类资产计数 + 命名空间摘要
+- GET /api/v1/assets/{asset_id}      单个资产完整元数据
 
 启动:uvicorn api.main:app --reload --port 8000
 """
@@ -22,11 +25,13 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from api.assets import router as assets_router
+
 load_dotenv()
 
 APP_NAME = "DesignAdvisor API"
-APP_VERSION = "0.2.0"
-APP_PHASE = "Phase 0 · 资产盘点"
+APP_VERSION = "0.3.0"
+APP_PHASE = "Phase 1 · 资产库 MVP 第一刀"
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
@@ -43,6 +48,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 资产库路由(Phase 1 #1 MVP 第一刀 · 8 件 fake-load)
+app.include_router(assets_router)
 
 
 class HealthInfo(BaseModel):
