@@ -44,10 +44,31 @@ export default function HomePage() {
         </p>
       </header>
 
-      <section className="mb-10 rounded-2xl border border-accent/30 bg-accent/5 p-6">
+      <section className="mb-6 rounded-2xl border border-accent/30 bg-accent/5 p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-widest text-accent">
+              资产库 · Phase 1 #1 启动
+            </p>
+            <h2 className="mt-2 text-xl font-medium">8 件 fake-load 资产</h2>
+            <p className="mt-1 text-sm text-ink-50/60">
+              4 类各 2 件(组件 / 页面 / 令牌 / 参考)· 字段对齐
+              docs/02-schema v0.1 · 命名空间预期对齐 docs/04 资产清单
+            </p>
+          </div>
+          <Link
+            href="/assets"
+            className="rounded-lg border border-accent/40 bg-accent/20 px-5 py-2.5 text-sm font-medium text-accent transition hover:bg-accent/30"
+          >
+            浏览资产库 →
+          </Link>
+        </div>
+      </section>
+
+      <section className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-ink-50/40">
               知识库 · Phase 0 #4 前置
             </p>
             <h2 className="mt-2 text-xl font-medium">24 条设计哲学</h2>
@@ -57,7 +78,7 @@ export default function HomePage() {
           </div>
           <Link
             href="/dp"
-            className="rounded-lg border border-accent/40 bg-accent/20 px-5 py-2.5 text-sm font-medium text-accent transition hover:bg-accent/30"
+            className="rounded-lg border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-medium text-ink-50 transition hover:border-white/40"
           >
             浏览 24 条 →
           </Link>

@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.5(2026-09-01)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.6(2026-09-02)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.6(2026-09-02)· T5 · Phase 1 #1 资产库 MVP 第二刀:新增 `app/assets/page.tsx` SSR 列表页消费后端 8 件 fake-load,顶部 4 类计数卡(对齐 `docs/04` 命名空间预期:组件 2/32 · 页面 2/19 · 令牌 2/73 · 参考 2/开放)+ `?kind=` + `?status=` + `?category=` 三维过滤,首页加资产库入口卡 · Web 端 0.3 → 0.4,后端 → 前端"半成品接力"完成
 - v0.5(2026-09-01)· T5 · Phase 1 #1 资产库 MVP 第一刀:新增 `api/assets.py` 模块(8 件 fake-load 资产,4 类各 2 件),暴露 `GET /api/v1/assets` 列表 + `/summary` 计数 + `/{id}` 详情三端点,字段对齐 `02-schema` v0.1;后端版本 0.2 → 0.3,阶段由 Phase 0 资产盘点进入 Phase 1 资产库 MVP
 - v0.4(2026-08-31)· T5 · 新增 `docs/04-可入库资产清单_v0.1.md`,4 类(组件 32 / 页面 19 / 令牌 ~73 / 参考开放)骨架清单对齐 `02-schema` v0.1;Phase 0 #2 闭环,Phase 1 OAuth 后按此清单遍历
 - v0.3(2026-08-29)· T5 · 新增 `app/dp/page.tsx` SSR 浏览页(消费 `GET /api/v1/dp/search?q=` + `?category=`),首页加知识库入口 · Web 端先于飞书 bot 跑通规范查询 UI
