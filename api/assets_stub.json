@@ -1,0 +1,2642 @@
+{
+  "schema_version": "0.1.0",
+  "doc_source": "docs/04-可入库资产清单_v0.1.md",
+  "field_alignment": "docs/02-设计资产元数据-schema.md v0.1",
+  "stub_marker": "stub-",
+  "manual_assets_count": 8,
+  "skipped_manual_subs": [
+    "component/button/primary",
+    "component/form/input",
+    "page/auth/login",
+    "page/overview/dashboard",
+    "token/color/brand-primary",
+    "token/spacing/4"
+  ],
+  "total": 125,
+  "by_kind": {
+    "component": 30,
+    "page": 17,
+    "token": 71,
+    "reference": 7
+  },
+  "namespace_target": {
+    "component": 32,
+    "page": 19,
+    "token": 73,
+    "reference": 7
+  },
+  "merged_total_with_manual": 133,
+  "assets": [
+    {
+      "id": "stub-comp-button-secondary-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "button",
+      "purpose": "[stub] button 类组件 / secondary · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "button",
+        "component",
+        "secondary"
+      ],
+      "code_ref": [
+        "packages/ui/src/Secondary.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-button-text-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "button",
+      "purpose": "[stub] button 类组件 / text · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "button",
+        "component",
+        "text"
+      ],
+      "code_ref": [
+        "packages/ui/src/Text.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-button-danger-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "button",
+      "purpose": "[stub] button 类组件 / danger · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "button",
+        "component",
+        "danger"
+      ],
+      "code_ref": [
+        "packages/ui/src/Danger.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-button-loading-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "button",
+      "purpose": "[stub] button 类组件 / loading · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "button",
+        "component",
+        "loading"
+      ],
+      "code_ref": [
+        "packages/ui/src/Loading.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-form-textarea-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "form",
+      "purpose": "[stub] form 类组件 / textarea · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "form",
+        "component",
+        "textarea"
+      ],
+      "code_ref": [
+        "packages/ui/src/Textarea.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-form-radio-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "form",
+      "purpose": "[stub] form 类组件 / radio · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "form",
+        "component",
+        "radio"
+      ],
+      "code_ref": [
+        "packages/ui/src/Radio.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-form-checkbox-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "form",
+      "purpose": "[stub] form 类组件 / checkbox · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "form",
+        "component",
+        "checkbox"
+      ],
+      "code_ref": [
+        "packages/ui/src/Checkbox.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-form-switch-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "form",
+      "purpose": "[stub] form 类组件 / switch · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "form",
+        "component",
+        "switch"
+      ],
+      "code_ref": [
+        "packages/ui/src/Switch.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-form-select-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "form",
+      "purpose": "[stub] form 类组件 / select · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "form",
+        "component",
+        "select"
+      ],
+      "code_ref": [
+        "packages/ui/src/Select.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-modal-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / modal · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "modal"
+      ],
+      "code_ref": [
+        "packages/ui/src/Modal.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-drawer-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / drawer · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "drawer"
+      ],
+      "code_ref": [
+        "packages/ui/src/Drawer.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-toast-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / toast · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "toast"
+      ],
+      "code_ref": [
+        "packages/ui/src/Toast.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-alert-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / alert · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "alert"
+      ],
+      "code_ref": [
+        "packages/ui/src/Alert.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-loading-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / loading · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "loading"
+      ],
+      "code_ref": [
+        "packages/ui/src/Loading.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-feedback-empty-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "feedback",
+      "purpose": "[stub] feedback 类组件 / empty · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "feedback",
+        "component",
+        "empty"
+      ],
+      "code_ref": [
+        "packages/ui/src/Empty.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-nav-topbar-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "nav",
+      "purpose": "[stub] nav 类组件 / topbar · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "nav",
+        "component",
+        "topbar"
+      ],
+      "code_ref": [
+        "packages/ui/src/Topbar.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-nav-sidebar-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "nav",
+      "purpose": "[stub] nav 类组件 / sidebar · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "nav",
+        "component",
+        "sidebar"
+      ],
+      "code_ref": [
+        "packages/ui/src/Sidebar.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-nav-breadcrumb-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "nav",
+      "purpose": "[stub] nav 类组件 / breadcrumb · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "nav",
+        "component",
+        "breadcrumb"
+      ],
+      "code_ref": [
+        "packages/ui/src/Breadcrumb.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-nav-pagination-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "nav",
+      "purpose": "[stub] nav 类组件 / pagination · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "nav",
+        "component",
+        "pagination"
+      ],
+      "code_ref": [
+        "packages/ui/src/Pagination.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-nav-tabs-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "nav",
+      "purpose": "[stub] nav 类组件 / tabs · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "nav",
+        "component",
+        "tabs"
+      ],
+      "code_ref": [
+        "packages/ui/src/Tabs.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-data-table-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "data",
+      "purpose": "[stub] data 类组件 / table · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "data",
+        "component",
+        "table"
+      ],
+      "code_ref": [
+        "packages/ui/src/Table.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-data-card-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "data",
+      "purpose": "[stub] data 类组件 / card · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "data",
+        "component",
+        "card"
+      ],
+      "code_ref": [
+        "packages/ui/src/Card.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-data-list-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "data",
+      "purpose": "[stub] data 类组件 / list · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "data",
+        "component",
+        "list"
+      ],
+      "code_ref": [
+        "packages/ui/src/List.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-data-stat-card-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "data",
+      "purpose": "[stub] data 类组件 / stat-card · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "data",
+        "component",
+        "stat-card"
+      ],
+      "code_ref": [
+        "packages/ui/src/StatCard.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-data-chart-frame-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "data",
+      "purpose": "[stub] data 类组件 / chart-frame · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "data",
+        "component",
+        "chart-frame"
+      ],
+      "code_ref": [
+        "packages/ui/src/ChartFrame.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-typography-heading-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "typography",
+      "purpose": "[stub] typography 类组件 / heading · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "typography",
+        "component",
+        "heading"
+      ],
+      "code_ref": [
+        "packages/ui/src/Heading.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-typography-paragraph-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "typography",
+      "purpose": "[stub] typography 类组件 / paragraph · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "typography",
+        "component",
+        "paragraph"
+      ],
+      "code_ref": [
+        "packages/ui/src/Paragraph.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-typography-quote-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "typography",
+      "purpose": "[stub] typography 类组件 / quote · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "typography",
+        "component",
+        "quote"
+      ],
+      "code_ref": [
+        "packages/ui/src/Quote.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-typography-list-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "typography",
+      "purpose": "[stub] typography 类组件 / list · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "typography",
+        "component",
+        "list"
+      ],
+      "code_ref": [
+        "packages/ui/src/List.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-comp-typography-code-block-v0.1.0",
+      "kind": "component",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "typography",
+      "purpose": "[stub] typography 类组件 / code-block · 字段待 OAuth 后回填;占位 purpose",
+      "tags": [
+        "typography",
+        "component",
+        "code-block"
+      ],
+      "code_ref": [
+        "packages/ui/src/CodeBlock.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-page-auth-register-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "auth",
+      "purpose": "[stub] auth 页面 / register · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "auth",
+        "page",
+        "register"
+      ],
+      "code_ref": [
+        "apps/web/app/(auth)/register/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-auth-forgot-password-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "auth",
+      "purpose": "[stub] auth 页面 / forgot-password · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "auth",
+        "page",
+        "forgot-password"
+      ],
+      "code_ref": [
+        "apps/web/app/(auth)/forgot-password/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-auth-two-factor-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "auth",
+      "purpose": "[stub] auth 页面 / two-factor · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "auth",
+        "page",
+        "two-factor"
+      ],
+      "code_ref": [
+        "apps/web/app/(auth)/two-factor/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-overview-home-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "overview",
+      "purpose": "[stub] overview 页面 / home · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "overview",
+        "page",
+        "home"
+      ],
+      "code_ref": [
+        "apps/web/app/(overview)/home/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-overview-workspace-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "overview",
+      "purpose": "[stub] overview 页面 / workspace · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "overview",
+        "page",
+        "workspace"
+      ],
+      "code_ref": [
+        "apps/web/app/(overview)/workspace/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-content-list-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "content",
+      "purpose": "[stub] content 页面 / list · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "content",
+        "page",
+        "list"
+      ],
+      "code_ref": [
+        "apps/web/app/(content)/list/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-content-detail-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "content",
+      "purpose": "[stub] content 页面 / detail · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "content",
+        "page",
+        "detail"
+      ],
+      "code_ref": [
+        "apps/web/app/(content)/detail/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-content-search-result-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "content",
+      "purpose": "[stub] content 页面 / search-result · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "content",
+        "page",
+        "search-result"
+      ],
+      "code_ref": [
+        "apps/web/app/(content)/search-result/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-flow-onboarding-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "flow",
+      "purpose": "[stub] flow 页面 / onboarding · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "flow",
+        "page",
+        "onboarding"
+      ],
+      "code_ref": [
+        "apps/web/app/(flow)/onboarding/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-flow-empty-state-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "flow",
+      "purpose": "[stub] flow 页面 / empty-state · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "flow",
+        "page",
+        "empty-state"
+      ],
+      "code_ref": [
+        "apps/web/app/(flow)/empty-state/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-flow-error-page-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "flow",
+      "purpose": "[stub] flow 页面 / error-page · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "flow",
+        "page",
+        "error-page"
+      ],
+      "code_ref": [
+        "apps/web/app/(flow)/error-page/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-flow-404-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "flow",
+      "purpose": "[stub] flow 页面 / 404 · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "flow",
+        "page",
+        "404"
+      ],
+      "code_ref": [
+        "apps/web/app/(flow)/404/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-flow-500-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "flow",
+      "purpose": "[stub] flow 页面 / 500 · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "flow",
+        "page",
+        "500"
+      ],
+      "code_ref": [
+        "apps/web/app/(flow)/500/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-settings-profile-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "settings",
+      "purpose": "[stub] settings 页面 / profile · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "settings",
+        "page",
+        "profile"
+      ],
+      "code_ref": [
+        "apps/web/app/(settings)/profile/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-settings-team-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "settings",
+      "purpose": "[stub] settings 页面 / team · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "settings",
+        "page",
+        "team"
+      ],
+      "code_ref": [
+        "apps/web/app/(settings)/team/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-settings-billing-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "settings",
+      "purpose": "[stub] settings 页面 / billing · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "settings",
+        "page",
+        "billing"
+      ],
+      "code_ref": [
+        "apps/web/app/(settings)/billing/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-page-settings-notification-v0.1.0",
+      "kind": "page",
+      "version": "0.1.0",
+      "status": "draft",
+      "category": "settings",
+      "purpose": "[stub] settings 页面 / notification · 整页设计稿待 OAuth 后拉取;占位 purpose",
+      "tags": [
+        "settings",
+        "page",
+        "notification"
+      ],
+      "code_ref": [
+        "apps/web/app/(settings)/notification/page.tsx"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-design",
+        "feishu:owner-product"
+      ]
+    },
+    {
+      "id": "stub-token-color-brand-secondary-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / brand-secondary · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "brand-secondary"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#brand-secondary"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-text-primary-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / text-primary · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "text-primary"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#text-primary"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-text-secondary-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / text-secondary · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "text-secondary"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#text-secondary"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-text-tertiary-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / text-tertiary · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "text-tertiary"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#text-tertiary"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-text-disabled-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / text-disabled · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "text-disabled"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#text-disabled"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-text-inverse-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / text-inverse · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "text-inverse"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#text-inverse"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-bg-canvas-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / bg-canvas · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "bg-canvas"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#bg-canvas"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-bg-surface-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / bg-surface · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "bg-surface"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#bg-surface"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-bg-elevated-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / bg-elevated · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "bg-elevated"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#bg-elevated"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-bg-overlay-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / bg-overlay · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "bg-overlay"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#bg-overlay"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-border-default-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / border-default · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "border-default"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#border-default"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-border-strong-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / border-strong · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "border-strong"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#border-strong"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-border-focus-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / border-focus · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "border-focus"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#border-focus"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-border-divider-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / border-divider · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "border-divider"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#border-divider"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-success-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-success · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-success"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-success"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-warning-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-warning · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-warning"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-warning"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-error-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-error · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-error"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-error"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-info-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-info · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-info"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-info"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-hover-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-hover · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-hover"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-hover"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-state-active-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / state-active · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "state-active"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#state-active"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-neutral-50-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / neutral-50 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "neutral-50"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#neutral-50"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-neutral-100-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / neutral-100 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "neutral-100"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#neutral-100"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-neutral-500-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / neutral-500 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "neutral-500"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#neutral-500"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-color-neutral-900-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "color",
+      "purpose": "[stub] color 令牌 / neutral-900 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "color",
+        "token",
+        "neutral-900"
+      ],
+      "code_ref": [
+        "packages/tokens/src/color.json#neutral-900"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-xs-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / xs · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "xs"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#xs"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-sm-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / sm · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "sm"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#sm"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-base-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / base · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "base"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#base"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-lg-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / lg · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "lg"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#lg"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-2xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / 2xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "2xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#2xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-3xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / 3xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "3xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#3xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-size-4xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-size",
+      "purpose": "[stub] font-size 令牌 / 4xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-size",
+        "token",
+        "4xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-size.json#4xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-weight-regular-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-weight",
+      "purpose": "[stub] font-weight 令牌 / regular · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-weight",
+        "token",
+        "regular"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-weight.json#regular"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-weight-medium-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-weight",
+      "purpose": "[stub] font-weight 令牌 / medium · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-weight",
+        "token",
+        "medium"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-weight.json#medium"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-weight-semibold-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-weight",
+      "purpose": "[stub] font-weight 令牌 / semibold · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-weight",
+        "token",
+        "semibold"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-weight.json#semibold"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-font-weight-bold-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "font-weight",
+      "purpose": "[stub] font-weight 令牌 / bold · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "font-weight",
+        "token",
+        "bold"
+      ],
+      "code_ref": [
+        "packages/tokens/src/font-weight.json#bold"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-line-height-tight-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "line-height",
+      "purpose": "[stub] line-height 令牌 / tight · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "line-height",
+        "token",
+        "tight"
+      ],
+      "code_ref": [
+        "packages/tokens/src/line-height.json#tight"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-line-height-normal-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "line-height",
+      "purpose": "[stub] line-height 令牌 / normal · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "line-height",
+        "token",
+        "normal"
+      ],
+      "code_ref": [
+        "packages/tokens/src/line-height.json#normal"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-line-height-relaxed-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "line-height",
+      "purpose": "[stub] line-height 令牌 / relaxed · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "line-height",
+        "token",
+        "relaxed"
+      ],
+      "code_ref": [
+        "packages/tokens/src/line-height.json#relaxed"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-0-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 0 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "0"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#0"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-1-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 1 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "1"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#1"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-2-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 2 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "2"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#2"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-3-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 3 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "3"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#3"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-6-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 6 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "6"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#6"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-8-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 8 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "8"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#8"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-12-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 12 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "12"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#12"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-spacing-16-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "spacing",
+      "purpose": "[stub] spacing 令牌 / 16 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "spacing",
+        "token",
+        "16"
+      ],
+      "code_ref": [
+        "packages/tokens/src/spacing.json#16"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-none-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / none · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "none"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#none"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-sm-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / sm · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "sm"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#sm"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-base-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / base · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "base"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#base"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-md-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / md · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "md"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#md"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-lg-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / lg · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "lg"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#lg"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-2xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / 2xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "2xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#2xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-radius-full-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "radius",
+      "purpose": "[stub] radius 令牌 / full · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "radius",
+        "token",
+        "full"
+      ],
+      "code_ref": [
+        "packages/tokens/src/radius.json#full"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-xs-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / xs · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "xs"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#xs"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-sm-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / sm · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "sm"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#sm"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-base-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / base · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "base"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#base"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-md-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / md · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "md"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#md"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-lg-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / lg · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "lg"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#lg"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-2xl-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / 2xl · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "2xl"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#2xl"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-shadow-inner-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "shadow",
+      "purpose": "[stub] shadow 令牌 / inner · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "shadow",
+        "token",
+        "inner"
+      ],
+      "code_ref": [
+        "packages/tokens/src/shadow.json#inner"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-0-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 0 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "0"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#0"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-5-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 5 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "5"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#5"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-10-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 10 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "10"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#10"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-20-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 20 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "20"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#20"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-40-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 40 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "40"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#40"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-60-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 60 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "60"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#60"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-80-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 80 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "80"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#80"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-token-opacity-100-v0.1.0",
+      "kind": "token",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "opacity",
+      "purpose": "[stub] opacity 令牌 / 100 · 数值待 Style Dictionary 同步;占位 purpose",
+      "tags": [
+        "opacity",
+        "token",
+        "100"
+      ],
+      "code_ref": [
+        "packages/tokens/src/opacity.json#100"
+      ],
+      "figma_ref": "PENDING_OAUTH",
+      "reviewers": [
+        "feishu:owner-brand",
+        "feishu:owner-frontend"
+      ]
+    },
+    {
+      "id": "stub-ref-competitor-feishu-chat-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "competitor",
+      "purpose": "[stub] competitor 参考 / feishu-chat · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "competitor",
+        "reference",
+        "feishu-chat"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-competitor-notion-workspace-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "competitor",
+      "purpose": "[stub] competitor 参考 / notion-workspace · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "competitor",
+        "reference",
+        "notion-workspace"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-competitor-figma-editor-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "competitor",
+      "purpose": "[stub] competitor 参考 / figma-editor · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "competitor",
+        "reference",
+        "figma-editor"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-inspiration-dribbble-shot-01-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "inspiration",
+      "purpose": "[stub] inspiration 参考 / dribbble-shot-01 · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "inspiration",
+        "reference",
+        "dribbble-shot-01"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-inspiration-awwwards-site-01-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "inspiration",
+      "purpose": "[stub] inspiration 参考 / awwwards-site-01 · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "inspiration",
+        "reference",
+        "awwwards-site-01"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-master-dieter-rams-braun-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "master",
+      "purpose": "[stub] master 参考 / dieter-rams-braun · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "master",
+        "reference",
+        "dieter-rams-braun"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    },
+    {
+      "id": "stub-ref-master-kenya-hara-muji-v0.1.0",
+      "kind": "reference",
+      "version": "0.1.0",
+      "status": "approved",
+      "category": "master",
+      "purpose": "[stub] master 参考 / kenya-hara-muji · 外部 URL 待设计师提交;占位 purpose",
+      "tags": [
+        "master",
+        "reference",
+        "kenya-hara-muji"
+      ],
+      "code_ref": [],
+      "figma_ref": null,
+      "reviewers": [
+        "feishu:owner-design"
+      ],
+      "external_ref": null
+    }
+  ]
+}

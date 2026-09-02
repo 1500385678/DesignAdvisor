@@ -1,29 +1,29 @@
 """
-DesignAdvisor · 资产库后端 v0.1 (Phase 1 #1 资产库 MVP 第一刀)
+DesignAdvisor · 资产库后端 v0.2 (Phase 1 #1 资产库 MVP 切第三刀 · 32+19+73 全量回填)
 
-按 `docs/04-可入库资产清单_v0.1.md` §3-§6 的 4 类资产骨架 fake-load 8 件代表
-(每类 2 件),对齐 `docs/02-设计资产元数据-schema.md` v0.1 字段约定。
+合并两路数据(对齐 `docs/04-可入库资产清单_v0.1.md` §2-§6 命名空间):
+- 8 件 manual fake-load(本文件 `_ASSET_CATALOG`,手工详细,kebab-case)
+- 125 件 stub(由 `scripts/gen_assets.py` 从 docs/04 表格批量生成,`assets_stub.json`)
+
+合计 133 件(8 + 125) = 组件 32 / 页面 19 / 令牌 73 / 参考 9(开放,首批 7+manual 2)。
+字段口径统一对齐 `docs/02-设计资产元数据-schema.md` v0.1。
 
 端点:
 - GET /api/v1/assets                 列出资产(支持 ?kind / ?category / ?status 过滤)
 - GET /api/v1/assets/summary         4 类计数 + 命名空间摘要(前端 Dashboard 用)
-
-Fake-load 范围(8 件):
-- component 2 件:  comp-button-primary / comp-form-input
-- page 2 件:       page-auth-login / page-overview-dashboard
-- token 2 件:      token-color-brand-primary / token-spacing-4
-- reference 2 件:  ref-dingtalk-chat / ref-linear-issue
+- GET /api/v1/assets/{asset_id}      按 ID 查单个资产完整元数据
 
 不做什么(留待后续 T1-T5 任务):
-- 32+19+73+开放 件全量回填(本端点只是 fake-load 形状,OAuth 接入后遍历入库)
-- 真实 Figma 拉取(等 Phase 0 #3 OAuth)
-- POST/PUT/DELETE(只读 v0.1,Phase 1 #1 后段加写入)
+- 真实 Figma 拉取(等 Phase 0 #3 OAuth;stub 的 figma_ref = PENDING_OAUTH)
+- POST/PUT/DELETE(只读 v0.2,Phase 1 #1 后段加写入)
 - 视觉相似度 hash(Phase 2 CLIP)
+- stub 字段回填(目前 purpose / tags / code_ref 是占位,OAuth 后批量回填)
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import List, Optional
 
 from fastapi import APIRouter, Query
@@ -143,6 +143,21 @@ _FAKE_LOAD_TS = datetime(2026, 9, 1, 3, 20, 0, tzinfo=timezone.utc)
 _PLACEHOLDER_USER = "feishu:placeholder"  # Phase 0 #3 OAuth 接入后回填真实 user_ref
 
 
+# ---------- 加载 scripts/gen_assets.py 批量生成的 stub ----------
+# v0.2 扩展(2026-09-03):从 8 件 fake-load 扩展到 133 件 = 8 manual + 125 stub,
+# stub 由 `scripts/gen_assets.py` 从 `docs/04-可入库资产清单 v0.1` §2-§6
+# 命名空间批量生成,字段对齐 `docs/02-设计资产元数据-schema.md` v0.1;
+# id 前缀 `stub-` 标识批量产物,与 manual 8 件 kebab-case 区分。
+_STUB_JSON = Path(__file__).parent / "assets_stub.json"
+_STUB_ASSETS: List[dict] = []
+if _STUB_JSON.exists():
+    import json  # noqa: E402 局部 import,避免 main 启动开销
+    _STUB_ASSETS = json.loads(_STUB_JSON.read_text(encoding="utf-8")).get("assets", [])
+
+# 合并:8 件 manual + 125 件 stub = 133 件(对齐 docs/04 §2-§6 命名空间)
+_ASSETS_ALL: List[dict] = list(_ASSET_CATALOG) + _STUB_ASSETS
+
+
 class AssetSummary(BaseModel):
     """单个资产的简化摘要(列表/卡片展示用)"""
 
@@ -249,10 +264,11 @@ def list_assets(
 ) -> AssetsResponse:
     """列出全部 4 类资产,支持三种维度过滤。
 
-    v0.1 仅 fake-load 8 件(每类 2 件),OAuth 接入后按 docs/04 §3-§6 命名空间
-    全量回填到 32+19+73+开放 件。
+    v0.2 合并 8 件 manual + 125 件 stub = 133 件(对齐 docs/04 §2-§6
+    命名空间:组件 32 / 页面 19 / 令牌 73 / 参考 9=首批 7+manual 2)。
+    OAuth 接入后,stub 的 figma_ref / code_ref / purpose 字段会回填真实值。
     """
-    filtered = _ASSET_CATALOG
+    filtered = _ASSETS_ALL
     if kind is not None:
         filtered = [a for a in filtered if a["kind"] == kind]
     if category is not None:
@@ -262,7 +278,7 @@ def list_assets(
 
     summaries = [_to_summary(a) for a in filtered]
     return AssetsResponse(
-        total=len(_ASSET_CATALOG),
+        total=len(_ASSETS_ALL),
         returned=len(summaries),
         assets=summaries,
     )
@@ -274,19 +290,19 @@ def list_assets(
     summary="4 类资产计数 + 命名空间摘要(前端 Dashboard 用)",
 )
 def assets_summary() -> AssetsSummaryResponse:
-    """返回 4 类资产当前 fake-load 数量 + docs/04 §3-§6 预期命名空间小计。
+    """返回 4 类资产当前合并数(8 manual + 125 stub)+ docs/04 §3-§6 预期命名空间小计。
 
-    用法:前端 Dashboard 渲染 "组件 2/32 · 页面 2/19 · 令牌 2/73 · 参考 2/开放"
+    用法:前端 Dashboard 渲染 "组件 32/32 · 页面 19/19 · 令牌 73/73 · 参考 9/开放"
     """
     by_kind: dict = {}
     by_category: dict = {}
-    for a in _ASSET_CATALOG:
+    for a in _ASSETS_ALL:
         by_kind[a["kind"]] = by_kind.get(a["kind"], 0) + 1
         key = f"{a['kind']}/{a['category']}"
         by_category[key] = by_category.get(key, 0) + 1
 
     return AssetsSummaryResponse(
-        total=len(_ASSET_CATALOG),
+        total=len(_ASSETS_ALL),
         by_kind=by_kind,
         by_category=by_category,
         namespaces={
@@ -304,8 +320,11 @@ def assets_summary() -> AssetsSummaryResponse:
     summary="按 ID 查单个资产完整元数据",
 )
 def get_asset(asset_id: str) -> AssetDetail:
-    """按 ID 查单个资产完整元数据,用于详情页/评审页面。"""
-    for a in _ASSET_CATALOG:
+    """按 ID 查单个资产完整元数据,用于详情页/评审页面。
+
+    v0.2 在 8 件 manual + 125 件 stub 共 133 件中查找。
+    """
+    for a in _ASSETS_ALL:
         if a["id"] == asset_id:
             return _to_detail(a)
     from fastapi import HTTPException
