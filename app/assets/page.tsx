@@ -12,6 +12,11 @@ type Asset = {
   figma_synced: boolean;
 };
 
+type AssetSearchHit = Asset & {
+  score: number;
+  matched_fields: string[];
+};
+
 type AssetsSummary = {
   total: number;
   by_kind: Record<string, number>;
@@ -20,6 +25,14 @@ type AssetsSummary = {
     string,
     { current: number; target: number | null; note: string }
   >;
+};
+
+type AssetSearchResponse = {
+  total: number;
+  matched: number;
+  query: string;
+  tokens: string[];
+  assets: AssetSearchHit[];
 };
 
 const API_BASE =
@@ -65,7 +78,7 @@ async function fetchAssets(opts: {
   kind?: string;
   category?: string;
   status?: string;
-}): Promise<{ items: Asset[]; summary: AssetsSummary | null }> {
+}): Promise<Asset[]> {
   const params = new URLSearchParams();
   if (opts.kind) params.set("kind", opts.kind);
   if (opts.category) params.set("category", opts.category);
@@ -80,13 +93,40 @@ async function fetchAssets(opts: {
     const res = await fetch(assetsUrl, { cache: "no-store" });
     if (!res.ok) {
       console.error(`[assets/page] fetch ${assetsUrl} -> ${res.status}`);
-      return { items: [], summary: null };
+      return [];
     }
     const data = (await res.json()) as { assets: Asset[] };
-    return { items: data.assets ?? [], summary: null };
+    return data.assets ?? [];
   } catch (err) {
     console.error(`[assets/page] fetch ${assetsUrl} failed:`, err);
-    return { items: [], summary: null };
+    return [];
+  }
+}
+
+// 语义搜索端点(Phase 1 #1 切第四刀 · 2026-09-04)
+// 走 /api/v1/assets/search?q=...&kind=...&status=... · 后端字段权重 id 5x / tags 3x / purpose 2x / category 1x
+async function searchAssets(opts: {
+  q: string;
+  kind?: string;
+  status?: string;
+  limit?: number;
+}): Promise<AssetSearchResponse | null> {
+  const params = new URLSearchParams();
+  params.set("q", opts.q);
+  if (opts.kind) params.set("kind", opts.kind);
+  if (opts.status) params.set("status", opts.status);
+  if (opts.limit) params.set("limit", String(opts.limit));
+  const url = `${API_BASE.replace(/\/$/, "")}/api/v1/assets/search?${params.toString()}`;
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) {
+      console.error(`[assets/page] search ${url} -> ${res.status}`);
+      return null;
+    }
+    return (await res.json()) as AssetSearchResponse;
+  } catch (err) {
+    console.error(`[assets/page] search ${url} failed:`, err);
+    return null;
   }
 }
 
@@ -108,17 +148,31 @@ async function fetchSummary(): Promise<AssetsSummary | null> {
 export default async function AssetsPage({
   searchParams,
 }: {
-  searchParams: { kind?: string; category?: string; status?: string };
+  searchParams: {
+    q?: string;
+    kind?: string;
+    category?: string;
+    status?: string;
+  };
 }) {
+  const q = (searchParams.q ?? "").trim();
   const kind = searchParams.kind ?? "";
   const category = searchParams.category ?? "";
   const status = searchParams.status ?? "";
 
-  // 列表 + 摘要(摘要用于顶部 4 类计数卡,不随过滤项变化)
-  const [{ items }, summary] = await Promise.all([
-    fetchAssets({ kind, category, status }),
+  const isSearchMode = q.length > 0; // 有 q 走 search 端点,否则走 list 端点
+
+  // 三路并发:搜索 / 列表(无 q 时) / 摘要
+  const [searchResult, listResult, summary] = await Promise.all([
+    isSearchMode ? searchAssets({ q, kind, status, limit: 50 }) : Promise.resolve(null),
+    isSearchMode ? Promise.resolve([]) : fetchAssets({ kind, category, status }),
     fetchSummary(),
   ]);
+
+  // 搜索模式用 search.assets,列表模式用 listResult
+  const items: Asset[] = isSearchMode
+    ? (searchResult?.assets ?? [])
+    : listResult;
 
   // 顶部 4 类计数卡数据(从 summary.namespaces 读 current/target)
   const kindCards = summary
@@ -141,7 +195,7 @@ export default async function AssetsPage({
           Phase 1 #1 · 资产库 MVP
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-ink-50/70">
-          消费后端 8 件 fake-load 资产(4 类各 2 件)· 字段对齐
+          消费后端 8 件 fake-load + 125 件 stub = 133 件资产(4 类)· 字段对齐
           <code className="mx-1 rounded bg-white/5 px-1.5 py-0.5 text-xs">
             docs/02-设计资产元数据-schema
           </code>
@@ -185,7 +239,7 @@ export default async function AssetsPage({
         </section>
       )}
 
-      {/* 过滤表单(GET · URL 状态可分享) */}
+      {/* 过滤+搜索表单(GET · URL 状态可分享) */}
       <form
         action="/assets"
         method="get"
@@ -220,13 +274,21 @@ export default async function AssetsPage({
           placeholder="子分类(例如 button / auth / color)"
           className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-ink-50 placeholder:text-ink-50/30 focus:border-accent/60 focus:outline-none"
         />
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="🔍 关键词搜索(id / tags / 描述 / 子分类,支持中文)"
+          className="flex-[2] rounded-lg border border-accent/30 bg-accent/[0.04] px-4 py-2.5 text-sm text-ink-50 placeholder:text-ink-50/40 focus:border-accent/60 focus:outline-none"
+          aria-label="关键词搜索"
+        />
         <button
           type="submit"
           className="rounded-lg border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-medium text-accent transition hover:bg-accent/20"
         >
-          查询
+          搜索
         </button>
-        {(kind || category || status) && (
+        {(q || kind || category || status) && (
           <Link
             href="/assets"
             className="rounded-lg border border-white/10 px-4 py-2.5 text-center text-sm text-ink-50/60 transition hover:border-white/30"
@@ -240,20 +302,30 @@ export default async function AssetsPage({
       <section>
         <div className="mb-4 flex items-baseline justify-between">
           <p className="text-xs uppercase tracking-widest text-ink-50/40">
-            {kind
-              ? `类型:${KIND_LABELS[kind] ?? kind}`
-              : category
-                ? `子分类:${category}`
-                : status
-                  ? `状态:${STATUS_LABELS[status] ?? status}`
-                  : "全部 8 件"}
+            {isSearchMode
+              ? `搜索:"${q}"${kind ? ` · ${KIND_LABELS[kind] ?? kind}` : ""}${
+                  status ? ` · ${STATUS_LABELS[status] ?? status}` : ""
+                }`
+              : kind
+                ? `类型:${KIND_LABELS[kind] ?? kind}`
+                : category
+                  ? `子分类:${category}`
+                  : status
+                    ? `状态:${STATUS_LABELS[status] ?? status}`
+                    : "全部 133 件"}
           </p>
-          <p className="text-xs text-ink-50/40">命中 {items.length} 件</p>
+          <p className="text-xs text-ink-50/40">
+            {isSearchMode
+              ? `命中 ${items.length} / ${searchResult?.total ?? 0} 件 · 字段权重:id 5x · tags 3x · 描述 2x · 子分类 1x`
+              : `命中 ${items.length} 件`}
+          </p>
         </div>
 
         {items.length === 0 ? (
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-10 text-center text-sm text-ink-50/50">
-            没有命中结果。试试其他过滤条件,或
+            {isSearchMode
+              ? `没有命中 "${q}" 的资产。试试更短的关键词,或`
+              : "没有命中结果。试试其他过滤条件,或"}
             <Link href="/assets" className="ml-1 text-accent hover:underline">
               清除筛选
             </Link>
@@ -261,39 +333,53 @@ export default async function AssetsPage({
           </div>
         ) : (
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {items.map((a) => (
-              <li
-                key={a.id}
-                className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-accent/60"
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-mono text-xs text-accent">{a.id}</span>
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink-50/50">
-                    {KIND_LABELS[a.kind] ?? a.kind} · v{a.version}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-ink-50/80">{a.purpose}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  {a.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-md border border-white/10 bg-white/[0.03] px-1.5 py-0.5 text-[10px] text-ink-50/50"
-                    >
-                      #{t}
+            {items.map((a) => {
+              const hit = a as AssetSearchHit;
+              const isHit = isSearchMode && typeof hit.score === "number";
+              return (
+                <li
+                  key={a.id}
+                  className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-accent/60"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-mono text-xs text-accent">{a.id}</span>
+                    <div className="flex items-center gap-1.5">
+                      {isHit && (
+                        <span
+                          className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent"
+                          title={`命中字段:${hit.matched_fields.join(", ") || "-"}`}
+                        >
+                          ★ {hit.score.toFixed(1)}
+                        </span>
+                      )}
+                      <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink-50/50">
+                        {KIND_LABELS[a.kind] ?? a.kind} · v{a.version}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm text-ink-50/80">{a.purpose}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    {a.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md border border-white/10 bg-white/[0.03] px-1.5 py-0.5 text-[10px] text-ink-50/50"
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2 text-[10px] text-ink-50/40">
+                    <span>
+                      状态 · {STATUS_LABELS[a.status] ?? a.status}
                     </span>
-                  ))}
-                </div>
-                <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2 text-[10px] text-ink-50/40">
-                  <span>
-                    状态 · {STATUS_LABELS[a.status] ?? a.status}
-                  </span>
-                  <span>
-                    代码引用 {a.code_ref_count} · Figma{" "}
-                    {a.figma_synced ? "✓" : "待 OAuth"}
-                  </span>
-                </div>
-              </li>
-            ))}
+                    <span>
+                      代码引用 {a.code_ref_count} · Figma{" "}
+                      {a.figma_synced ? "✓" : "待 OAuth"}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
@@ -306,13 +392,17 @@ export default async function AssetsPage({
           </code>
           +
           <code className="ml-1 rounded bg-white/5 px-1.5 py-0.5">
+            /api/v1/assets/search
+          </code>
+          +
+          <code className="ml-1 rounded bg-white/5 px-1.5 py-0.5">
             /api/v1/assets/summary
           </code>
-          · 后端 v0.3(2026-09-01)· Web 消费 v0.4(2026-09-02)
+          · 后端 v0.3 → v0.4(2026-09-04)· Web 消费 v0.4 → v0.5(2026-09-04)
         </p>
         <p className="mt-1">
-          不做什么(留待后续):32+19+73 全量回填(需 docs/04 命名空间批量生成脚本)
-          · Figma OAuth 真实入库 · 语义搜索(关键词 + 标签 + 视觉相似度)
+          不做什么(留待后续):Figma OAuth 真实入库 · 视觉相似度 hash(Phase 2 CLIP)·
+          倒排索引升级(whoosh)
         </p>
       </footer>
     </main>

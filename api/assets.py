@@ -11,11 +11,12 @@ DesignAdvisor · 资产库后端 v0.2 (Phase 1 #1 资产库 MVP 切第三刀 · 
 端点:
 - GET /api/v1/assets                 列出资产(支持 ?kind / ?category / ?status 过滤)
 - GET /api/v1/assets/summary         4 类计数 + 命名空间摘要(前端 Dashboard 用)
+- GET /api/v1/assets/search          语义搜索(关键词 + 字段权重 ranking + ?kind / ?status 二次过滤)
 - GET /api/v1/assets/{asset_id}      按 ID 查单个资产完整元数据
 
 不做什么(留待后续 T1-T5 任务):
 - 真实 Figma 拉取(等 Phase 0 #3 OAuth;stub 的 figma_ref = PENDING_OAUTH)
-- POST/PUT/DELETE(只读 v0.2,Phase 1 #1 后段加写入)
+- POST/PUT/DELETE(只读 v0.3,Phase 1 #1 后段加写入)
 - 视觉相似度 hash(Phase 2 CLIP)
 - stub 字段回填(目前 purpose / tags / code_ref 是占位,OAuth 后批量回填)
 """
@@ -210,6 +211,35 @@ class AssetsSummaryResponse(BaseModel):
     )
 
 
+class AssetSearchHit(BaseModel):
+    """语义搜索单条命中(带 ranking score)"""
+
+    id: str
+    kind: str
+    version: str
+    status: str
+    category: str
+    purpose: str
+    tags: List[str]
+    code_ref_count: int = Field(..., description="关联代码引用数量,0=无")
+    figma_synced: bool
+    score: float = Field(..., description="ranking 分数,越高越相关")
+    matched_fields: List[str] = Field(
+        default_factory=list,
+        description="命中的字段名(用于前端高亮调试)",
+    )
+
+
+class AssetSearchResponse(BaseModel):
+    """语义搜索响应(关键词 + 字段权重 ranking)"""
+
+    total: int = Field(..., description="搜索池总量(=133 件,排除过滤后)")
+    matched: int = Field(..., description="命中件数(score>0)")
+    query: str = Field(..., description="原始查询字符串")
+    tokens: List[str] = Field(..., description="拆词后的小写 token 列表")
+    assets: List[AssetSearchHit]
+
+
 def _to_summary(asset: dict) -> AssetSummary:
     return AssetSummary(
         id=asset["id"],
@@ -314,6 +344,175 @@ def assets_summary() -> AssetsSummaryResponse:
     )
 
 
+# ---- 语义搜索(Phase 1 #1 切第四刀 · 2026-09-04)----
+# ranking 设计:简单 token 重合度 + 字段权重
+#   - id      权重 5(id 完整命中说明用户精准搜了某个具体资产)
+#   - tags    权重 3(标签是设计意图最浓缩的摘要)
+#   - purpose 权重 2(描述含完整语义信息,但通常较长)
+#   - category 权重 1(粗分类,弱信号)
+# 任一 token 在任一字段命中即累加 score,完全无命中 score=0 不入结果;
+# tokens 拆分规则:按非字母数字非中文切分(对中文输入也友好,中文字符 char 级别保留)。
+# 二次过滤:支持 ?kind / ?status 收敛搜索池(在 ranking 之前过滤)。
+#
+# Phase 2 升级:向量检索(CLIP) + 倒排索引(whoosh) + 同义词扩展(同义 tag 合并)。
+
+_SEARCH_FIELD_WEIGHTS = {
+    "id": 5.0,
+    "tags": 3.0,
+    "purpose": 2.0,
+    "category": 1.0,
+}
+
+
+def _tokenize(text: str) -> List[str]:
+    """对查询字符串做最小拆词。
+
+    - 全小写
+    - 按非字母数字(ASCII 字母数字之外)切分,中文按 char 切分
+    - 过滤空 token
+    """
+    import re  # noqa: E402 局部 import
+
+    text = text.strip().lower()
+    if not text:
+        return []
+    # 用 [\W_]+ 切分(unicode-aware),中文 / 日文 / 韩文都按 char 切分
+    tokens = re.split(r"[\W_]+", text, flags=re.UNICODE)
+    return [t for t in tokens if t]
+
+
+def _search_score(asset: dict, tokens: List[str]) -> tuple:
+    """对单个资产按 tokens 累计 score,返回 (score, matched_fields)。
+
+    每个 token 独立计算贡献,字段权重只表示"该字段每次命中的基础分"。
+    """
+    if not tokens:
+        return 0.0, []
+    id_l = asset["id"].lower()
+    cat_l = asset["category"].lower()
+    purpose_l = asset["purpose"].lower()
+    tags_l = [t.lower() for t in asset.get("tags", [])]
+    id_text = " ".join([id_l, cat_l, purpose_l, " ".join(tags_l)])
+
+    score = 0.0
+    matched: List[str] = []
+
+    for tok in tokens:
+        if not tok:
+            continue
+        # id 完全相等(精准)权重最高
+        if tok in id_l:
+            score += _SEARCH_FIELD_WEIGHTS["id"]
+            if "id" not in matched:
+                matched.append("id")
+        # tags 命中(逐 tag 匹配)
+        if any(tok in tag for tag in tags_l):
+            score += _SEARCH_FIELD_WEIGHTS["tags"]
+            if "tags" not in matched:
+                matched.append("tags")
+        # purpose 命中
+        if tok in purpose_l:
+            score += _SEARCH_FIELD_WEIGHTS["purpose"]
+            if "purpose" not in matched:
+                matched.append("purpose")
+        # category 命中
+        if tok in cat_l:
+            score += _SEARCH_FIELD_WEIGHTS["category"]
+            if "category" not in matched:
+                matched.append("category")
+        # 全文字符串兜底命中(中文字符 char 级别也覆盖)
+        if tok in id_text and not matched:
+            score += 0.1
+            matched.append("text")
+
+    return round(score, 3), matched
+
+
+@router.get(
+    "/search",
+    response_model=AssetSearchResponse,
+    summary="语义搜索(关键词 + 字段权重 ranking,可叠加 ?kind / ?status)",
+)
+def search_assets(
+    q: str = Query(
+        ...,
+        min_length=1,
+        description="搜索关键词,例: button / 登录 / color / auth,支持中英文",
+    ),
+    kind: Optional[str] = Query(
+        default=None,
+        description="资产类型,可选值: component / page / token / reference",
+    ),
+    status: Optional[str] = Query(
+        default=None,
+        description="状态过滤,可选值: draft / in_review / approved / deprecated / archived",
+    ),
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=500,
+        description="返回前 N 条(ranking 后),默认 50",
+    ),
+) -> AssetSearchResponse:
+    """在 133 件资产(8 manual + 125 stub)中按关键词搜索。
+
+    ranking 算法:
+    - 拆词 → 全小写 → token 列表
+    - 字段权重:id 5x / tags 3x / purpose 2x / category 1x
+    - 任一 token 在任一字段命中即累加 score
+    - 按 score 降序返回,score=0 不入结果
+
+    二次过滤:?kind / ?status 在 ranking 之前收敛搜索池,排名仍然在子集中计算。
+
+    用法:
+    - 设计师:输入"登录"找 auth 页面、输入"主色"找 brand primary token
+    - 飞书 bot:@bot 查 "button" → 转发到 /search?q=button → 返回卡片列表
+    - 5 周后 Phase 2 升级:CLIP 视觉相似度 + whoosh 倒排索引
+    """
+    # 1. 二次过滤(在 ranking 前收敛搜索池)
+    pool = _ASSETS_ALL
+    if kind is not None:
+        pool = [a for a in pool if a["kind"] == kind]
+    if status is not None:
+        pool = [a for a in pool if a["status"] == status]
+
+    # 2. 拆词
+    tokens = _tokenize(q)
+
+    # 3. ranking
+    hits: List[AssetSearchHit] = []
+    for a in pool:
+        score, matched = _search_score(a, tokens)
+        if score <= 0:
+            continue
+        hits.append(
+            AssetSearchHit(
+                id=a["id"],
+                kind=a["kind"],
+                version=a["version"],
+                status=a["status"],
+                category=a["category"],
+                purpose=a["purpose"],
+                tags=a.get("tags", []),
+                code_ref_count=len(a.get("code_ref", [])),
+                figma_synced=a.get("figma_ref") not in (None, "PENDING_OAUTH"),
+                score=score,
+                matched_fields=matched,
+            )
+        )
+    # 4. 排序 + 截断
+    hits.sort(key=lambda h: h.score, reverse=True)
+    hits = hits[:limit]
+
+    return AssetSearchResponse(
+        total=len(pool),
+        matched=len(hits),
+        query=q,
+        tokens=tokens,
+        assets=hits,
+    )
+
+
 @router.get(
     "/{asset_id}",
     response_model=AssetDetail,
@@ -323,6 +522,7 @@ def get_asset(asset_id: str) -> AssetDetail:
     """按 ID 查单个资产完整元数据,用于详情页/评审页面。
 
     v0.2 在 8 件 manual + 125 件 stub 共 133 件中查找。
+    路由顺序:必须放在 /search 之后(否则 path param 会吞掉 /search 路径)。
     """
     for a in _ASSETS_ALL:
         if a["id"] == asset_id:

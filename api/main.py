@@ -9,6 +9,7 @@ DesignAdvisor · FastAPI 后端 v0.3
 - GET /api/v1/dp/search?q=...        关键词搜索(id/title/source 命中,飞书 bot 用)
 - GET /api/v1/assets                 资产列表(支持 ?kind / ?category / ?status 过滤)
 - GET /api/v1/assets/summary         4 类资产计数 + 命名空间摘要
+- GET /api/v1/assets/search          语义搜索(关键词 + 字段权重 ranking · Phase 1 #1 切第四刀)
 - GET /api/v1/assets/{asset_id}      单个资产完整元数据
 
 启动:uvicorn api.main:app --reload --port 8000

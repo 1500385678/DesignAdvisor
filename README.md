@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.6(2026-09-02)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.8(2026-09-04)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,8 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.8(2026-09-04)· T1 · Phase 1 #1 资产库 MVP 第四刀:新增 `GET /api/v1/assets/search?q=&kind=&status=&limit=` 语义搜索端点(133 件 + 字段权重 ranking:id 5x / tags 3x / 描述 2x / 子分类 1x + tokenize 中英文)+ 前端 `app/assets/page.tsx` 顶部加搜索框 + 命中卡片显示 `★ score` 与 `命中字段` 提示,Phase 1 #1 推进 3/5 → **4/5**,后端 v0.3 → v0.4 · Web 消费 v0.4 → v0.5;Phase 2 升级预埋:CLIP 视觉相似度 + whoosh 倒排索引
+- v0.7(2026-09-03)· T1 · Phase 1 #1 资产库 MVP 第三刀:`scripts/gen_assets.py` 从 `docs/04-可入库资产清单 v0.1` §2-§6 命名空间批量生成 125 件 stub + `api/assets_stub.json` 2642 行,`api/assets.py` 加载合并 8 manual + 125 stub = **133 件**,`/api/v1/assets` total 133 · `/summary` 命名空间 32-19-73-9,后端 v0.2 → v0.3
 - v0.6(2026-09-02)· T5 · Phase 1 #1 资产库 MVP 第二刀:新增 `app/assets/page.tsx` SSR 列表页消费后端 8 件 fake-load,顶部 4 类计数卡(对齐 `docs/04` 命名空间预期:组件 2/32 · 页面 2/19 · 令牌 2/73 · 参考 2/开放)+ `?kind=` + `?status=` + `?category=` 三维过滤,首页加资产库入口卡 · Web 端 0.3 → 0.4,后端 → 前端"半成品接力"完成
 - v0.5(2026-09-01)· T5 · Phase 1 #1 资产库 MVP 第一刀:新增 `api/assets.py` 模块(8 件 fake-load 资产,4 类各 2 件),暴露 `GET /api/v1/assets` 列表 + `/summary` 计数 + `/{id}` 详情三端点,字段对齐 `02-schema` v0.1;后端版本 0.2 → 0.3,阶段由 Phase 0 资产盘点进入 Phase 1 资产库 MVP
 - v0.4(2026-08-31)· T5 · 新增 `docs/04-可入库资产清单_v0.1.md`,4 类(组件 32 / 页面 19 / 令牌 ~73 / 参考开放)骨架清单对齐 `02-schema` v0.1;Phase 0 #2 闭环,Phase 1 OAuth 后按此清单遍历
@@ -56,6 +58,7 @@ npm start            # 启动生产服务
   - `GET /api/v1/dp/search?q=` · DP 关键词搜索(飞书 bot 用)
   - `GET /api/v1/assets` · 资产列表(支持 `?kind=` / `?category=` / `?status=` 过滤,Phase 1 #1)
   - `GET /api/v1/assets/summary` · 4 类资产计数 + 命名空间摘要(Dashboard 用)
+  - `GET /api/v1/assets/search` · 语义搜索(关键词 + 字段权重 ranking · Phase 1 #1 切第四刀 2026-09-04)
   - `GET /api/v1/assets/{id}` · 单个资产完整元数据
 - CORS 默认白名单 `http://localhost:3000`,通过 `CORS_ORIGINS` 环境变量覆盖
 
@@ -97,6 +100,6 @@ DesignWeb/
 ```
 
 ## 当前阶段
-- **Phase 0**(资产盘点):6/9 完成(+ v0.5 资产后端 fake-load 端点,Phase 0 阶段闭环向 Phase 1 推进)
-- **Phase 1**(MVP):0.5/6 · **#1 资产库切第一刀**已落 `api/assets.py` 后端 8 件 fake-load 端点,前端 `app/assets/page.tsx` 列表页待切
+- **Phase 0**(资产盘点):9/9 完成(0904 巡检口径,9 个实际目标项全完成 = #1 哲学清单 / #2 4 类资产骨架 / #5 schema / #7 工程骨架 / #8 24 条 DP / Web dp SSR / #10 4 类资产清单 v0.1 / Phase 1 #1 后端 / Phase 1 #1 前端;#3 Figma OAuth / #4 飞书 bot / #6 设计师访谈 仍待动)
+- **Phase 1**(MVP):4/6 · **#1 资产库 4/5** 子项打勾(后端 fake-load ✓ + 前端列表页 ✓ + 32+19+73 全量回填 ✓ + 语义搜索 ✓),剩余 1 子项 Figma OAuth 真实入库
 - 详见 [[项目开发计划]]
