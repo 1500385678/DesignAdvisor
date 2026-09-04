@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.8(2026-09-04)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.9(2026-09-05)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.9(2026-09-05)· T1 · **Phase 0 #4 飞书 bot 雏形闭环**:新增 `bot/` 三模块(`webhook.py` FastAPI 路由 + `lark_client.py` lark-cli 包装 + `search_handler.py` 业务分发)+ `api/main.py` 注册 `bot_router` + 后端版本 0.3 → **0.4**;支持 `asset <关键词>` / `dp <关键词>` / `help` 三个命令(裸关键词默认走 asset),`GET /api/v1/bot/health` 200,`POST /api/v1/bot/webhook` 端到端验证(asset button → 5/133 命中 / dp 简约 → 1 命中 / help → 命令清单);`FEISHU_BOT_DRY_RUN=1` 默认 dry_run(只 print 不真发,Phase 0 试运行安全);七前置全栈就绪(0828-0904 七个 commit)差最后 20% 全部补齐,Phase 0 业务工程 10/10 闭环
 - v0.8(2026-09-04)· T1 · Phase 1 #1 资产库 MVP 第四刀:新增 `GET /api/v1/assets/search?q=&kind=&status=&limit=` 语义搜索端点(133 件 + 字段权重 ranking:id 5x / tags 3x / 描述 2x / 子分类 1x + tokenize 中英文)+ 前端 `app/assets/page.tsx` 顶部加搜索框 + 命中卡片显示 `★ score` 与 `命中字段` 提示,Phase 1 #1 推进 3/5 → **4/5**,后端 v0.3 → v0.4 · Web 消费 v0.4 → v0.5;Phase 2 升级预埋:CLIP 视觉相似度 + whoosh 倒排索引
 - v0.7(2026-09-03)· T1 · Phase 1 #1 资产库 MVP 第三刀:`scripts/gen_assets.py` 从 `docs/04-可入库资产清单 v0.1` §2-§6 命名空间批量生成 125 件 stub + `api/assets_stub.json` 2642 行,`api/assets.py` 加载合并 8 manual + 125 stub = **133 件**,`/api/v1/assets` total 133 · `/summary` 命名空间 32-19-73-9,后端 v0.2 → v0.3
 - v0.6(2026-09-02)· T5 · Phase 1 #1 资产库 MVP 第二刀:新增 `app/assets/page.tsx` SSR 列表页消费后端 8 件 fake-load,顶部 4 类计数卡(对齐 `docs/04` 命名空间预期:组件 2/32 · 页面 2/19 · 令牌 2/73 · 参考 2/开放)+ `?kind=` + `?status=` + `?category=` 三维过滤,首页加资产库入口卡 · Web 端 0.3 → 0.4,后端 → 前端"半成品接力"完成
@@ -60,7 +61,59 @@ npm start            # 启动生产服务
   - `GET /api/v1/assets/summary` · 4 类资产计数 + 命名空间摘要(Dashboard 用)
   - `GET /api/v1/assets/search` · 语义搜索(关键词 + 字段权重 ranking · Phase 1 #1 切第四刀 2026-09-04)
   - `GET /api/v1/assets/{id}` · 单个资产完整元数据
+  - `GET /api/v1/bot/health` · 飞书 bot 健康检查(Phase 0 #4 2026-09-05)
+  - `POST /api/v1/bot/webhook` · 飞书事件回调(dry_run 默认开,Phase 0 试运行)
 - CORS 默认白名单 `http://localhost:3000`,通过 `CORS_ORIGINS` 环境变量覆盖
+
+### 飞书 bot(Phase 0 #4 雏形闭环,2026-09-05)
+
+`bot/` 三模块,把 Web 端搜索能力塞进飞书群:
+
+- `bot/search_handler.py` · 业务分发:解析 `asset <kw>` / `dp <kw>` / `help` 三个命令,裸关键词默认走 asset;调本机 `/api/v1/assets/search` 或 `/api/v1/dp/search` 拉命中,渲染 1-3 条简版卡片文本
+- `bot/lark_client.py` · lark-cli 包装,默认 `FEISHU_BOT_DRY_RUN=1` 只 print 不真发;真发前 `FEISHU_BOT_DRY_RUN=0` 关闭
+- `bot/webhook.py` · FastAPI 路由 `POST /api/v1/bot/webhook`,收飞书事件后用 `run_in_threadpool` 调 search_handler(避免 uvicorn 单线程事件循环自调本地后端的死锁)
+
+命令清单:
+```
+help                · 本清单
+asset <关键词>      · 搜设计资产(组件/页面/令牌/参考 · 133 件)
+dp <关键词>         · 搜设计哲学规范(24 条)
+<关键词>            · 默认走 asset
+```
+
+试运行(默认 dry_run):
+```bash
+# 1) 启动后端
+cd _DesignLib/DesignWeb
+python3 -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+
+# 2) 干跑 bot 分发(无需后端,直接验证命令解析)
+python3 -c "from bot.search_handler import dispatch; print(dispatch('help'))"
+python3 -c "from bot.search_handler import dispatch; print(dispatch('asset button'))"
+
+# 3) 端到端 webhook 测试
+curl -X POST "http://127.0.0.1:8000/api/v1/bot/webhook?chat_id=oc_test_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"header":{"event_type":"im.message.receive_v1"},"event":{"message":{"chat_id":"oc_test_xxx","content":{"text":"asset button"}},"sender":{"sender_id":{"open_id":"ou_test"}}}}'
+
+# 4) 真发(谨慎):lark-cli --profile design im +messages-send ...
+FEISHU_BOT_DRY_RUN=0 python3 -c "
+from bot.lark_client import send_text
+send_text('oc_real_chat_id', 'hello from design bot')
+"
+```
+
+环境变量:
+- `FEISHU_BOT_DRY_RUN` · `1`(默认,dry_run)/ `0`(真发)
+- `LARK_CLI_BIN` · lark-cli 路径(默认 `lark-cli`,假设在 PATH)
+- `LARK_PROFILE` · lark-cli profile 名(默认 `design`,与 36 行业约定一致)
+- `DESIGNADVISOR_API` · 本机后端基址(默认 `http://127.0.0.1:8000`,用 127.0.0.1 避免 macOS localhost IPv6 解析问题)
+
+后续 T1-T5 计划:
+- 真接入 lark-cli Verify Token + URL 验签
+- 飞书卡片 / 富文本(本轮只回纯文本)
+- 群 vs 私聊区分
+- 限流 / 去重(上线后看)
 
 ```bash
 cd _DesignLib/DesignWeb
@@ -85,6 +138,10 @@ DesignWeb/
 ├── api/                 # FastAPI 后端
 │   ├── main.py
 │   └── requirements.txt
+├── bot/                 # 飞书 bot(Phase 0 #4 · 2026-09-05)
+│   ├── webhook.py
+│   ├── search_handler.py
+│   └── lark_client.py
 ├── docs/                # 详档
 │   ├── 01-设计顾问-技术方案-v1.0.md
 │   ├── 02-设计资产元数据-schema.md
@@ -100,6 +157,6 @@ DesignWeb/
 ```
 
 ## 当前阶段
-- **Phase 0**(资产盘点):9/9 完成(0904 巡检口径,9 个实际目标项全完成 = #1 哲学清单 / #2 4 类资产骨架 / #5 schema / #7 工程骨架 / #8 24 条 DP / Web dp SSR / #10 4 类资产清单 v0.1 / Phase 1 #1 后端 / Phase 1 #1 前端;#3 Figma OAuth / #4 飞书 bot / #6 设计师访谈 仍待动)
+- **Phase 0**(资产盘点):**10/10 业务工程闭环**(0905 巡检口径,9 实际目标 + #4 飞书 bot 雏形 = 10 项全完成 = #1 哲学清单 / #2 4 类资产骨架 / #5 schema / #7 工程骨架 / #8 24 条 DP / Web dp SSR / #10 4 类资产清单 v0.1 / Phase 1 #1 后端 / Phase 1 #1 前端 / **#4 飞书 bot 雏形闭环** 2026-09-05);#3 Figma OAuth / #6 设计师访谈 仍待动(纯外部沟通)
 - **Phase 1**(MVP):4/6 · **#1 资产库 4/5** 子项打勾(后端 fake-load ✓ + 前端列表页 ✓ + 32+19+73 全量回填 ✓ + 语义搜索 ✓),剩余 1 子项 Figma OAuth 真实入库
 - 详见 [[项目开发计划]]

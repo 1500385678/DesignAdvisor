@@ -24,3 +24,6 @@ data/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache//
+
+# T1/T4 临时交接文件(每日 plan,跑完即删)
+.plan/
