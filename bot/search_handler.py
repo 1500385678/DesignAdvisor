@@ -25,12 +25,14 @@ DesignAdvisor · 飞书 bot 业务分发器(Phase 0 #4 飞书 bot 闭环核心)
 from __future__ import annotations
 
 import os
-from typing import List, Tuple
+from typing import Any, List, Tuple, Union
 
 # 飞书消息最大长度(防截断)
 FEISHU_MAX_LEN = 1500
 # 卡片展示数量上限
 HITS_DISPLAY_LIMIT = 3
+# 支持的 format 取值
+SUPPORTED_FORMATS = ("text", "card")
 
 
 # ---------- 命令路由 ----------
@@ -156,16 +158,40 @@ def _render_dp_hits(query: str, dps: List[dict]) -> str:
 
 # ---------- 入口 ----------
 
-def dispatch(text: str) -> str:
+def dispatch(text: str, format: str = "text") -> Union[str, dict]:
     """飞书 bot 消息分发入口。
 
     Args:
-        text: 飞书消息原始文本(含 @bot 前缀也可,parse_command 已 strip 处理)
+        text:   飞书消息原始文本(含 @bot 前缀也可,parse_command 已 strip 处理)
+        format: 输出格式,可选 "text"(默认,纯文本,Phase 0 试运行)或 "card"
+                (飞书交互卡片 dict,Phase 1 切真发时由 lark_client.send_card 投递)
 
     Returns:
-        要回给飞书的纯文本(可能含多行 / emoji,1-3 条简版卡片)。
+        - format="text" → 纯文本(可能含多行 / emoji,1-3 条简版文本卡片)
+        - format="card" → 飞书 interactive card dict(msg_type=interactive + card)
     """
+    if format not in SUPPORTED_FORMATS:
+        format = "text"
+
     cmd, keyword = parse_command(text)
+
+    # 卡片化:help / 0 命中 / 后端未响应 都走 bot/card.py 渲染(Phase 1 飞书切真发时复用)
+    if format == "card":
+        from bot.card import (
+            render_asset_card, render_dp_card, render_help_card,
+        )
+        if cmd == "help":
+            return render_help_card()
+        if not keyword:
+            # 关键词缺失,降级为 help 卡片(更友好,纯文本会回 ⚠️)
+            return render_help_card()
+        if cmd == "asset":
+            data = _call_assets_search(keyword)
+            return render_asset_card(keyword, data)
+        if cmd == "dp":
+            dps = _call_dp_search(keyword)
+            return render_dp_card(keyword, dps)
+        return render_help_card()  # 未知命令降级 help 卡片
 
     if cmd == "help":
         return (
