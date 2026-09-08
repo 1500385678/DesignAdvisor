@@ -19,7 +19,7 @@ uvicorn 单进程单线程下,webhook handler 在事件循环里同步自调会�
 
 不做什么(留待 Phase 1):
 - 私聊 vs 群消息区分(本轮统一入口,都走 search_handler.dispatch)
-- 消息去重 / 限流(Phase 0 试运行,流量低)
+- 消息去重(同 message_id 重发检测,留待 Phase 1 切真发后)
 """
 
 from __future__ import annotations
@@ -34,6 +34,7 @@ from starlette.concurrency import run_in_threadpool
 from bot.search_handler import dispatch
 from bot.lark_client import send_text, _dry_run
 from bot.signature import SignatureConfig, SignatureError, verify as verify_signature
+from bot.ratelimit import RateLimitConfig, RateLimiter, get_default_limiter
 
 router = APIRouter(prefix="/api/v1/bot", tags=["bot"])
 
@@ -54,6 +55,10 @@ class HealthResponse(BaseModel):
     lark_bin: str
     lark_profile: str
     signature_enabled: bool
+    rate_limit_enabled: bool
+    rate_limit_rps: float
+    rate_limit_burst: float
+    rate_limit_active_chats: int
     note: str = ""
 
 
@@ -106,14 +111,20 @@ def _extract_message(payload: Dict[str, Any]) -> Dict[str, Optional[str]]:
 )
 def health() -> HealthResponse:
     sig_cfg = SignatureConfig.from_env()
+    rl_cfg = RateLimitConfig.from_env()
+    rl_stats = get_default_limiter(rl_cfg).stats()
     return HealthResponse(
         status="ok",
         module="bot",
-        version="0.1.0",
+        version="0.3.0",
         dry_run=_dry_run(),
         lark_bin=os.getenv("LARK_CLI_BIN", "lark-cli"),
         lark_profile=os.getenv("LARK_PROFILE", "design"),
         signature_enabled=sig_cfg.enabled,
+        rate_limit_enabled=rl_cfg.enabled,
+        rate_limit_rps=rl_cfg.rps,
+        rate_limit_burst=rl_cfg.burst,
+        rate_limit_active_chats=rl_stats["active_chat_ids"],
         note=(
             "Phase 0 #4 飞书 bot 雏形闭环"
             + (" · dry_run=1(默认,只 print 不真发)" if _dry_run() else " · dry_run=0(真发,谨慎)")
@@ -121,6 +132,11 @@ def health() -> HealthResponse:
                 " · signature=on(已配 FEISHU_BOT_VERIFY_TOKEN,webhook 验签生效)"
                 if sig_cfg.enabled
                 else " · signature=off(未配 FEISHU_BOT_VERIFY_TOKEN,跳过验签,本地 dry_run 友好)"
+            )
+            + (
+                f" · ratelimit=on(rps={rl_cfg.rps},burst={rl_cfg.burst},每 chat_id 独立 token bucket)"
+                if rl_cfg.enabled
+                else " · ratelimit=off(未启用,流量大时建议开启)"
             )
         ),
     )
@@ -201,6 +217,19 @@ async def webhook(request: Request) -> WebhookResponse:
     if not chat_id:
         # 测试 / 调试用:支持 query 传 chat_id(便于 curl 干跑)
         chat_id = request.query_params.get("chat_id", "")
+
+    # 限流(每 chat_id 独立 token bucket,超限直接拒,不进业务分发)
+    rl_cfg = RateLimitConfig.from_env()
+    if rl_cfg.enabled and chat_id:
+        limiter = get_default_limiter(rl_cfg)
+        allowed, retry_after = await run_in_threadpool(limiter.acquire, chat_id)
+        if not allowed:
+            return WebhookResponse(
+                ok=False,
+                echo=text,
+                dry_run=_dry_run(),
+                note=f"rate limited: retry after {retry_after:.1f}s (rps={rl_cfg.rps}, burst={rl_cfg.burst})",
+            )
 
     # 业务分发(放线程池,避免单线程事件循环自调本地后端的死锁)
     reply = await run_in_threadpool(dispatch, text)
