@@ -110,10 +110,52 @@ send_text('oc_real_chat_id', 'hello from design bot')
 - `DESIGNADVISOR_API` · 本机后端基址(默认 `http://127.0.0.1:8000`,用 127.0.0.1 避免 macOS localhost IPv6 解析问题)
 
 后续 T1-T5 计划:
-- 真接入 lark-cli Verify Token + URL 验签
-- 飞书卡片 / 富文本(本轮只回纯文本)
-- 群 vs 私聊区分
-- 限流 / 去重(上线后看)
+- [x] 飞书卡片 / 富文本(`bot/card.py` 2026-09-06 闭环)
+- [x] URL 验签(`bot/signature.py` 2026-09-08 闭环)
+- [x] 限流(`bot/ratelimit.py` 2026-09-09 闭环)
+- [x] 切真发 smoke 工具(`bot/live_send.py` 2026-09-10 闭环)
+- [ ] 5 设计师 dogfood 验收(试运行首刀,纯外部沟通)
+
+#### 切真发部署清单(2026-09-10 闭环)
+
+`bot/live_send.py` 在 `bot/lark_client.py` 之上加"试运行前自检 + 真发编排"。
+限流 / URL 验签 / 卡片化 3 步安全垫 0906-0909 全部闭环后,本步把"切真发"流程
+收敛为 5 步部署清单:
+
+```bash
+# 步骤 1:lark-cli profile 配对(假设 lark-cli 已在 PATH)
+lark-cli login --profile design    # 走 OAuth 流程,落 ~/.lark-cli/config.yaml
+lark-cli --profile design im +messages-send --help   # 验证可用
+
+# 步骤 2:填 .env(env 已留 4 个变量,见 .env.example)
+FEISHU_BOT_DRY_RUN=0                 # 显式开启真发(默认 1=dry_run)
+FEISHU_BOT_VERIFY_TOKEN=<your_token> # 飞书后台"事件订阅 Verification Token"
+LARK_PROFILE=design                  # 已默认
+LARK_CLI_BIN=lark-cli                # 已默认
+
+# 步骤 3:探活(probe_lark_cli 调 --help,无副作用,不发消息)
+python3 -c "from bot.live_send import probe_lark_cli; print(probe_lark_cli('lark-cli', 'design'))"
+
+# 步骤 4:单条真发(send_via_lark 自动先 probe 后 send,probe 失败抛 ProbeError)
+FEISHU_BOT_DRY_RUN=0 FEISHU_BOT_DEFAULT_CHAT_ID=oc_xxx \
+  python3 -m bot.live_send "smoke test from design bot"
+
+# 步骤 5:5 设计师 dogfood 验收(2026-09-10 起的下一刀)
+# - 收集命中质量 / 响应延迟 / 卡片可读性 / 限流是否合理
+# - bot/webhook.py 加 dry_run/真发切换埋点 + 命中日志(纯本地)
+```
+
+试运行前自检(`bot/test_live_send.py` 8 单元):
+- env 默认值 / env chat_id 覆盖
+- dry_run=True 不调 subprocess / dry_run=False 调 subprocess 正确
+- chat_id 缺失 raise ValueError / 显式 chat_id 覆盖 default
+- probe 调 `lark-cli --profile <p> im +messages-send --help`
+- probe 失败(rc != 0 / lark-cli 不存在 / 超时)raise ProbeError
+
+已知边界(留待 Phase 1):
+- 单 chat_id 单消息(本轮 1 条 1 chat,无多 chat 广播)
+- 同步阻塞(无队列/重试,probe 失败直接 raise,人工介入)
+- 卡片切真发(`bot/card.py` 仍是 dry_run,卡片走 lark SDK 在 Phase 1 切)
 
 ```bash
 cd _DesignLib/DesignWeb
@@ -138,10 +180,15 @@ DesignWeb/
 ├── api/                 # FastAPI 后端
 │   ├── main.py
 │   └── requirements.txt
-├── bot/                 # 飞书 bot(Phase 0 #4 · 2026-09-05)
+├── bot/                 # 飞书 bot(Phase 0 #4 闭环 + 增强 1-4/4)
 │   ├── webhook.py
 │   ├── search_handler.py
-│   └── lark_client.py
+│   ├── lark_client.py
+│   ├── card.py
+│   ├── signature.py
+│   ├── ratelimit.py
+│   ├── live_send.py
+│   └── test_live_send.py
 ├── docs/                # 详档
 │   ├── 01-设计顾问-技术方案-v1.0.md
 │   ├── 02-设计资产元数据-schema.md
