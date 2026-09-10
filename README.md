@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.10(2026-09-11)· T1 · **飞书 bot 增强 - 命中日志埋点**(为 5 设计师 dogfood 做审计面):新增 `bot/hit_log.py` 命中日志模块(`HitLogConfig` dataclass + `HitLog` append-only JSONL 写入器 + `now_event()` 标准化事件构造 + `from_env()` 工厂 + `__main__` CLI 调试入口,2 env 变量:`FEISHU_BOT_HIT_LOG_ENABLED` 默认 0 / `FEISHU_BOT_HIT_LOG_PATH` 默认 `./data/bot_hit_log.jsonl`)+ `bot/test_hit_log.py` 12 单元 + `bot/webhook.py` 集成 6 个 return 点全覆盖打埋点(正常路径 / 验签失败 / JSON 失败 / payload 非 dict / 无 text / 限流拒发) + `bot/__init__.py` v0.4.0 → **v0.4.1** 增列 hit_log 子模块 + `HealthResponse` 增 `hit_log_enabled` 字段 + note 增 `hitlog=on/off` 段 + `.env.example` 增 2 行 env 变量 + README 新增"命中日志(2026-09-11 闭环)"小节(纯本地不上报,失败不阻塞主流程,字段:ts / chat_id / sender / text / ok / note[含 hit=N + latency_ms] / echo / reply_len / dry_run / event_type)+ 切真发部署清单 § 步骤 5 改为"开启命中日志";12/12 单元 + 3 端到端验证通过(单元 12 + E2E:/health hit_log_enabled 显式 + /webhook 正常路径落盘 + /webhook 限流连发 4 次前 3 通第 4 拒,JSONL 6 行字段全)
 - v0.9(2026-09-05)· T1 · **Phase 0 #4 飞书 bot 雏形闭环**:新增 `bot/` 三模块(`webhook.py` FastAPI 路由 + `lark_client.py` lark-cli 包装 + `search_handler.py` 业务分发)+ `api/main.py` 注册 `bot_router` + 后端版本 0.3 → **0.4**;支持 `asset <关键词>` / `dp <关键词>` / `help` 三个命令(裸关键词默认走 asset),`GET /api/v1/bot/health` 200,`POST /api/v1/bot/webhook` 端到端验证(asset button → 5/133 命中 / dp 简约 → 1 命中 / help → 命令清单);`FEISHU_BOT_DRY_RUN=1` 默认 dry_run(只 print 不真发,Phase 0 试运行安全);七前置全栈就绪(0828-0904 七个 commit)差最后 20% 全部补齐,Phase 0 业务工程 10/10 闭环
 - v0.8(2026-09-04)· T1 · Phase 1 #1 资产库 MVP 第四刀:新增 `GET /api/v1/assets/search?q=&kind=&status=&limit=` 语义搜索端点(133 件 + 字段权重 ranking:id 5x / tags 3x / 描述 2x / 子分类 1x + tokenize 中英文)+ 前端 `app/assets/page.tsx` 顶部加搜索框 + 命中卡片显示 `★ score` 与 `命中字段` 提示,Phase 1 #1 推进 3/5 → **4/5**,后端 v0.3 → v0.4 · Web 消费 v0.4 → v0.5;Phase 2 升级预埋:CLIP 视觉相似度 + whoosh 倒排索引
 - v0.7(2026-09-03)· T1 · Phase 1 #1 资产库 MVP 第三刀:`scripts/gen_assets.py` 从 `docs/04-可入库资产清单 v0.1` §2-§6 命名空间批量生成 125 件 stub + `api/assets_stub.json` 2642 行,`api/assets.py` 加载合并 8 manual + 125 stub = **133 件**,`/api/v1/assets` total 133 · `/summary` 命名空间 32-19-73-9,后端 v0.2 → v0.3
@@ -114,6 +115,7 @@ send_text('oc_real_chat_id', 'hello from design bot')
 - [x] URL 验签(`bot/signature.py` 2026-09-08 闭环)
 - [x] 限流(`bot/ratelimit.py` 2026-09-09 闭环)
 - [x] 切真发 smoke 工具(`bot/live_send.py` 2026-09-10 闭环)
+- [x] 命中日志埋点(`bot/hit_log.py` 2026-09-11 闭环,纯本地 JSONL,为 5 设计师 dogfood 做审计面)
 - [ ] 5 设计师 dogfood 验收(试运行首刀,纯外部沟通)
 
 #### 切真发部署清单(2026-09-10 闭环)
@@ -140,10 +142,40 @@ python3 -c "from bot.live_send import probe_lark_cli; print(probe_lark_cli('lark
 FEISHU_BOT_DRY_RUN=0 FEISHU_BOT_DEFAULT_CHAT_ID=oc_xxx \
   python3 -m bot.live_send "smoke test from design bot"
 
-# 步骤 5:5 设计师 dogfood 验收(2026-09-10 起的下一刀)
-# - 收集命中质量 / 响应延迟 / 卡片可读性 / 限流是否合理
-# - bot/webhook.py 加 dry_run/真发切换埋点 + 命中日志(纯本地)
+# 步骤 5:开启命中日志,为 5 设计师 dogfood 做审计面(2026-09-11 闭环)
+FEISHU_BOT_HIT_LOG_ENABLED=1   # 默认 0=关闭,5 设计师 dogfood 前开
+FEISHU_BOT_HIT_LOG_PATH=./data/bot_hit_log.jsonl  # 默认路径
+# - 每条 webhook 落 1 行 JSONL(纯本地不上报,失败不阻塞主流程)
+# - 字段:ts / chat_id / sender / text / ok / note / echo / reply_len / dry_run / event_type
+# - note 含 hit=N(best-effort 从 reply 提取)+ latency_ms(整条 webhook 处理耗时)
+# - 6 种场景全覆盖:正常路径 / 验签失败 / JSON 失败 / payload 非 dict / 无 text / 限流拒发
 ```
+
+#### 命中日志(2026-09-11 闭环)
+
+`bot/hit_log.py` 是"5 设计师 dogfood 验收"的基础设施 —— 纯本地 JSONL 落盘,
+**不上报、不外发**,只把 webhook 主路径的所有事件按 1 行 / 条 append 到文件,
+事后用 `jq` / `pandas` 简单分析"设计师问了什么 / 命中几条 / 限流拒几条"等。
+
+CLI 调试入口:
+
+```bash
+# 默认关闭,先开
+FEISHU_BOT_HIT_LOG_ENABLED=1 python3 -m bot.hit_log \
+  '{"text":"button","ok":true,"note":"hit=5"}'
+# → recorded ok=True → ./data/bot_hit_log.jsonl
+
+# 验签失败也落(便于事后看"误拒了多少")
+FEISHU_BOT_HIT_LOG_ENABLED=1 python3 -m bot.hit_log \
+  '{"text":"","ok":false,"note":"sig=deny reason=ts_out_of_range"}'
+```
+
+`bot/test_hit_log.py` 12 单元(env 默认 / env 启用 / env 路径 / 7 种假值关闭 /
+关闭 record 返 False / 启用 record 写 1 行 / 多次 record append / now_event 必填 /
+None 归一 / 写失败不抛 / get_default_hitlog / 自动创建父目录)。
+
+`GET /api/v1/bot/health` 增 `hit_log_enabled` 字段,note 段增 `hitlog=on(path)`
+或 `hitlog=off(未启用,5 设计师 dogfood 时建议开启)`。
 
 试运行前自检(`bot/test_live_send.py` 8 单元):
 - env 默认值 / env chat_id 覆盖
@@ -180,7 +212,7 @@ DesignWeb/
 ├── api/                 # FastAPI 后端
 │   ├── main.py
 │   └── requirements.txt
-├── bot/                 # 飞书 bot(Phase 0 #4 闭环 + 增强 1-4/4)
+├── bot/                 # 飞书 bot(Phase 0 #4 闭环 + 增强 1-5/5)
 │   ├── webhook.py
 │   ├── search_handler.py
 │   ├── lark_client.py
@@ -188,7 +220,9 @@ DesignWeb/
 │   ├── signature.py
 │   ├── ratelimit.py
 │   ├── live_send.py
-│   └── test_live_send.py
+│   ├── test_live_send.py
+│   ├── hit_log.py
+│   └── test_hit_log.py
 ├── docs/                # 详档
 │   ├── 01-设计顾问-技术方案-v1.0.md
 │   ├── 02-设计资产元数据-schema.md
