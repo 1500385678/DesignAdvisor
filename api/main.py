@@ -1,18 +1,24 @@
 """
-DesignAdvisor · FastAPI 后端 v0.4
+DesignAdvisor · FastAPI 后端 v0.5
 
-最小骨架 + 24 条设计哲学真实数据 + 8 件资产 fake-load + 飞书 bot 雏形闭环:
-- GET /healthz                       健康检查
-- GET /api/v1/info                   项目元信息(版本/阶段/模块清单)
-- GET /api/v1/dp                     24 条设计哲学清单(从 docs/03- 真实落库)
-- GET /api/v1/dp?category=...        按分类过滤(A/B/C/D/E 五类)
-- GET /api/v1/dp/search?q=...        关键词搜索(id/title/source 命中,飞书 bot 用)
-- GET /api/v1/assets                 资产列表(支持 ?kind / ?category / ?status 过滤)
-- GET /api/v1/assets/summary         4 类资产计数 + 命名空间摘要
-- GET /api/v1/assets/search          语义搜索(关键词 + 字段权重 ranking · Phase 1 #1 切第四刀)
-- GET /api/v1/assets/{asset_id}      单个资产完整元数据
-- GET /api/v1/bot/health             飞书 bot 健康检查(Phase 0 #4)
-- POST /api/v1/bot/webhook           飞书事件回调(dry_run 默认开,Phase 0 试运行)
+最小骨架 + 24 条设计哲学真实数据 + 8 件资产 fake-load + 飞书 bot 雏形闭环 + 设计评审模块 v0.1:
+- GET  /healthz                          健康检查
+- GET  /api/v1/info                      项目元信息(版本/阶段/模块清单)
+- GET  /api/v1/dp                        24 条设计哲学清单(从 docs/03- 真实落库)
+- GET  /api/v1/dp?category=...           按分类过滤(A/B/C/D/E 五类)
+- GET  /api/v1/dp/search?q=...           关键词搜索(id/title/source 命中,飞书 bot 用)
+- GET  /api/v1/assets                    资产列表(支持 ?kind / ?category / ?status 过滤)
+- GET  /api/v1/assets/summary            4 类资产计数 + 命名空间摘要
+- GET  /api/v1/assets/search             语义搜索(关键词 + 字段权重 ranking · Phase 1 #1 切第四刀)
+- GET  /api/v1/assets/{asset_id}         单个资产完整元数据
+- GET  /api/v1/bot/health                飞书 bot 健康检查(Phase 0 #4)
+- POST /api/v1/bot/webhook               飞书事件回调(dry_run 默认开,Phase 0 试运行)
+- POST /api/v1/reviews                   设计评审创建(Phase 1 #2 切第一刀 · 2026-09-12)
+- GET  /api/v1/reviews                   评审列表(?status / ?priority / ?asset_id 过滤)
+- GET  /api/v1/reviews/summary           6 状态 + 4 决策 + 4 优先级计数
+- GET  /api/v1/reviews/{review_id}       单个评审详情(含 decisions_log + transitions_log)
+- PATCH /api/v1/reviews/{id}/transition  状态机转移(draft → in_review → approved/rejected 等)
+- PATCH /api/v1/reviews/{id}/decision    评审人投票(append-only 决策日志)
 
 启动:uvicorn api.main:app --reload --port 8000
 """
@@ -29,13 +35,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from api.assets import router as assets_router
+from api.reviews import router as reviews_router
 from bot.webhook import router as bot_router
 
 load_dotenv()
 
 APP_NAME = "DesignAdvisor API"
-APP_VERSION = "0.4.0"
-APP_PHASE = "Phase 0 #4 飞书 bot 雏形闭环 + Phase 1 #1 资产库 MVP 4/5"
+APP_VERSION = "0.5.0"
+APP_PHASE = "Phase 0 #4 飞书 bot 雏形闭环 + Phase 1 #1 资产库 MVP 4/5 + Phase 1 #2 设计评审模块 v0.1"
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
@@ -55,6 +62,9 @@ app.add_middleware(
 
 # 资产库路由(Phase 1 #1 MVP 第一刀 · 8 件 fake-load)
 app.include_router(assets_router)
+
+# 设计评审路由(Phase 1 #2 切第一刀 · 2026-09-12 · v0.1)
+app.include_router(reviews_router)
 
 # 飞书 bot 路由(Phase 0 #4 飞书 bot 雏形闭环 · 2026-09-05)
 app.include_router(bot_router)

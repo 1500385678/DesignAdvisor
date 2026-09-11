@@ -1,6 +1,6 @@
 # DesignAdvisor
 
-> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.9(2026-09-05)
+> 27-设计-Design Level 行业 Web 项目 · 内部代号 DesignAdvisor · v0.11(2026-09-12)
 
 ## 项目说明
 基于张勇的 36 行业架构,DesignAdvisor 是 设计-Design Level 行业的 Web 端顾问产品。
@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.11(2026-09-12)· T1 · **Phase 1 #2 设计评审模块 v0.1 启动 - 切第一刀**(Phase 1 启动第二个 P0 · 评审协作):新增 `api/reviews.py` 评审后端(6 端点 + 6 Pydantic 模型 + 6 状态机 + 4 决策 + 4 优先级 + 内存 fake-load 3 件 seed)+ `api/test_reviews.py` 10/10 单元 + `api/main.py` 增 `reviews_router` + APP_VERSION v0.4.0 → **v0.5.0** + 模块清单增列"设计评审协作";6 状态机严格校验 `draft → in_review → {approved, rejected} / 撤回 → draft → deprecated → archived`(非法转移返 422 不改记录);决策日志 + 转移日志全部 append-only(审计面留痕);字段口径对齐 `docs/02-schema` v0.1 §6 `review_id`;10 单元全过(seed 可见 + 创建成功 + priority 非法 422 + 列表过滤 + summary 计数 + 状态机合法/非法 + 投票成功/状态不允许 + 不存在 404);7 项端到端验证全过(/healthz 200 + /info v0.5.0 + 默认 3 件 seed + summary 计数 + 创建 201 + transition 200 + decision 200);**Phase 1 推进 4/6 → 5/6**(评审协作 v0.1 后端闭环);**下一刀候选**:Phase 1 #2 切第二刀 Web 端评审页 v0.1(Next.js 列表 + 详情 + 状态切换 UI,消费 6 端点)+ 切第三刀飞书通知(评审创建/状态变更 @ 飞书群)+ 5 设计师 dogfood 验收(纯外部沟通)+ Phase 1 #1 Figma OAuth 真实入库(纯外部沟通)
 - v0.10(2026-09-11)· T1 · **飞书 bot 增强 - 命中日志埋点**(为 5 设计师 dogfood 做审计面):新增 `bot/hit_log.py` 命中日志模块(`HitLogConfig` dataclass + `HitLog` append-only JSONL 写入器 + `now_event()` 标准化事件构造 + `from_env()` 工厂 + `__main__` CLI 调试入口,2 env 变量:`FEISHU_BOT_HIT_LOG_ENABLED` 默认 0 / `FEISHU_BOT_HIT_LOG_PATH` 默认 `./data/bot_hit_log.jsonl`)+ `bot/test_hit_log.py` 12 单元 + `bot/webhook.py` 集成 6 个 return 点全覆盖打埋点(正常路径 / 验签失败 / JSON 失败 / payload 非 dict / 无 text / 限流拒发) + `bot/__init__.py` v0.4.0 → **v0.4.1** 增列 hit_log 子模块 + `HealthResponse` 增 `hit_log_enabled` 字段 + note 增 `hitlog=on/off` 段 + `.env.example` 增 2 行 env 变量 + README 新增"命中日志(2026-09-11 闭环)"小节(纯本地不上报,失败不阻塞主流程,字段:ts / chat_id / sender / text / ok / note[含 hit=N + latency_ms] / echo / reply_len / dry_run / event_type)+ 切真发部署清单 § 步骤 5 改为"开启命中日志";12/12 单元 + 3 端到端验证通过(单元 12 + E2E:/health hit_log_enabled 显式 + /webhook 正常路径落盘 + /webhook 限流连发 4 次前 3 通第 4 拒,JSONL 6 行字段全)
 - v0.9(2026-09-05)· T1 · **Phase 0 #4 飞书 bot 雏形闭环**:新增 `bot/` 三模块(`webhook.py` FastAPI 路由 + `lark_client.py` lark-cli 包装 + `search_handler.py` 业务分发)+ `api/main.py` 注册 `bot_router` + 后端版本 0.3 → **0.4**;支持 `asset <关键词>` / `dp <关键词>` / `help` 三个命令(裸关键词默认走 asset),`GET /api/v1/bot/health` 200,`POST /api/v1/bot/webhook` 端到端验证(asset button → 5/133 命中 / dp 简约 → 1 命中 / help → 命令清单);`FEISHU_BOT_DRY_RUN=1` 默认 dry_run(只 print 不真发,Phase 0 试运行安全);七前置全栈就绪(0828-0904 七个 commit)差最后 20% 全部补齐,Phase 0 业务工程 10/10 闭环
 - v0.8(2026-09-04)· T1 · Phase 1 #1 资产库 MVP 第四刀:新增 `GET /api/v1/assets/search?q=&kind=&status=&limit=` 语义搜索端点(133 件 + 字段权重 ranking:id 5x / tags 3x / 描述 2x / 子分类 1x + tokenize 中英文)+ 前端 `app/assets/page.tsx` 顶部加搜索框 + 命中卡片显示 `★ score` 与 `命中字段` 提示,Phase 1 #1 推进 3/5 → **4/5**,后端 v0.3 → v0.4 · Web 消费 v0.4 → v0.5;Phase 2 升级预埋:CLIP 视觉相似度 + whoosh 倒排索引
@@ -64,6 +65,12 @@ npm start            # 启动生产服务
   - `GET /api/v1/assets/{id}` · 单个资产完整元数据
   - `GET /api/v1/bot/health` · 飞书 bot 健康检查(Phase 0 #4 2026-09-05)
   - `POST /api/v1/bot/webhook` · 飞书事件回调(dry_run 默认开,Phase 0 试运行)
+  - `POST /api/v1/reviews` · 设计评审创建(Phase 1 #2 切第一刀 2026-09-12)
+  - `GET /api/v1/reviews` · 评审列表(支持 `?status=` / `?priority=` / `?asset_id=` 过滤)
+  - `GET /api/v1/reviews/summary` · 6 状态 + 4 决策 + 4 优先级计数
+  - `GET /api/v1/reviews/{review_id}` · 单个评审详情(含 decisions_log + transitions_log)
+  - `PATCH /api/v1/reviews/{review_id}/transition` · 状态机转移(合法校验,非法返 422)
+  - `PATCH /api/v1/reviews/{review_id}/decision` · 评审人投票(append-only 决策日志)
 - CORS 默认白名单 `http://localhost:3000`,通过 `CORS_ORIGINS` 环境变量覆盖
 
 ### 飞书 bot(Phase 0 #4 雏形闭环,2026-09-05)
@@ -189,6 +196,62 @@ None 归一 / 写失败不抛 / get_default_hitlog / 自动创建父目录)。
 - 同步阻塞(无队列/重试,probe 失败直接 raise,人工介入)
 - 卡片切真发(`bot/card.py` 仍是 dry_run,卡片走 lark SDK 在 Phase 1 切)
 
+### 设计评审模块 v0.1(2026-09-12 启动 · 切第一刀)
+
+Phase 1 启动第二个 P0(评审协作),后端先就位,Web 端 + 飞书通知后续两刀。
+`api/reviews.py` 实现评审的核心数据模型 + 6 端点 + 6 状态机严格校验。
+
+**数据模型 v0.1**(字段口径对齐 `docs/02-schema` v0.1 §6 `review_id`):
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `id` | str | ✓ | `rev-<8hex>`,进程内 UUID-like,Phase 1 #2 后段切 SQLite 自增 |
+| `title` | str(≤80字) | ✓ | 评审标题 |
+| `description` | str(≤500字) | ✗ | 评审描述 |
+| `asset_id` | str | ✗ | 关联资产 ID(可选,允许独立评审) |
+| `status` | enum | ✓ | 6 状态:draft / in_review / approved / rejected / deprecated / archived |
+| `decision` | enum | ✓ | 4 决策:pending / approved / rejected_with_reason / request_changes |
+| `priority` | enum | ✓ | 4 档:low / medium / high / blocker |
+| `created_by` | user_ref | ✓ | 飞书 user_id(占位 `feishu:placeholder`,OAuth 后回填) |
+| `reviewers` | user_ref[] | ✗ | 飞书 user_id 列表(0-N 个) |
+| `decisions_log` | append-only | ✓ | 投票历史,每条 {decision / voter / comment / at} |
+| `transitions_log` | append-only | ✓ | 状态机转移历史,每条 {from / to / reason / actor / at} |
+| `created_at` / `updated_at` | ISO8601 | ✓ | UTC 时间戳 |
+
+**6 状态机**(非法转移返 422,不修改记录):
+
+```
+draft ──submit──→ in_review ──approve──→ approved ──deprecate──→ deprecated ──→ archived
+  ↑                  │                                                       ↑
+  └─withdraw─────────┤                                                       │
+                     └──reject──→ rejected ──reopen──→ in_review             │
+                                  │                                          │
+                                  └──────────────────→ archived ──────────────┘
+```
+
+**6 端点**:
+- `POST /api/v1/reviews` · 创建评审(必填 title + priority,默认 status=draft / decision=pending,返 201)
+- `GET /api/v1/reviews` · 列表(支持 `?status=` / `?priority=` / `?asset_id=` 过滤,按 created_at 倒序)
+- `GET /api/v1/reviews/summary` · 6 状态 + 4 决策 + 4 优先级计数(前端 Dashboard)
+- `GET /api/v1/reviews/{review_id}` · 单个评审详情(含完整 decisions_log + transitions_log)
+- `PATCH /api/v1/reviews/{review_id}/transition` · 状态机转移(合法校验,非法返 422)
+- `PATCH /api/v1/reviews/{review_id}/decision` · 评审人投票(append-only 日志,同步更新 decision 字段)
+
+**3 件 fake-load seed**(内存存储,Phase 1 #2 切第四刀换 SQLite):
+- `rev-seed-001` · 评审 comp-button-primary 圆角 4 → 8px,priority=high / status=in_review
+- `rev-seed-002` · 评审 page-auth-login 视觉稿定稿,priority=medium / status=draft
+- `rev-seed-003` · 评审 token-color-brand-primary 暗黑模式适配,priority=low / status=approved
+
+**10/10 单元 + 7 端到端验证**:
+- 单元:seed 可见 / 创建成功 / priority 非法 422 / 列表过滤 / summary 计数 / 状态机合法 / 状态机非法 / 投票成功 / 投票状态不允许 / 不存在 404
+- 端到端:/healthz 200 / /info v0.5.0 / 默认 3 件 seed / summary 计数 / 创建 201 / transition 200 / decision 200
+
+**下一刀候选**:
+- 切第二刀 · Web 端评审页 v0.1(Next.js 列表 + 详情 + 状态切换 UI,消费 6 端点)
+- 切第三刀 · 飞书通知 v0.1(评审创建/状态变更 @ 飞书群,利用已闭环的 5 件套)
+- 切第四刀 · 真实 SQLite 持久化(替代内存 fake-load,数据可入库)
+- 切第五刀 · 票数聚合 + 阈值通过(替代单票同步,多人评审场景)
+
 ```bash
 cd _DesignLib/DesignWeb
 python3 -m venv .venv
@@ -208,9 +271,15 @@ DesignWeb/
 ├── app/                 # Next.js App Router
 │   ├── layout.tsx
 │   ├── page.tsx
-│   └── globals.css
+│   ├── globals.css
+│   ├── assets/          # 资产库 Web 端(Phase 1 #1)
+│   └── dp/              # 设计哲学 Web 端
 ├── api/                 # FastAPI 后端
 │   ├── main.py
+│   ├── assets.py        # 资产库后端(Phase 1 #1)
+│   ├── assets_stub.json # 125 件 stub 数据
+│   ├── reviews.py       # 设计评审后端(Phase 1 #2 切第一刀 2026-09-12)
+│   ├── test_reviews.py  # 评审后端 10 单元
 │   └── requirements.txt
 ├── bot/                 # 飞书 bot(Phase 0 #4 闭环 + 增强 1-5/5)
 │   ├── webhook.py
@@ -226,7 +295,10 @@ DesignWeb/
 ├── docs/                # 详档
 │   ├── 01-设计顾问-技术方案-v1.0.md
 │   ├── 02-设计资产元数据-schema.md
-│   └── 03-_DesignLib盘点_设计哲学清单_v0.1.md
+│   ├── 03-_DesignLib盘点_设计哲学清单_v0.1.md
+│   └── 04-可入库资产清单_v0.1.md
+├── scripts/             # 数据生成脚本
+│   └── gen_assets.py
 ├── .env.example
 ├── .gitignore
 ├── next.config.mjs
@@ -238,6 +310,6 @@ DesignWeb/
 ```
 
 ## 当前阶段
-- **Phase 0**(资产盘点):**10/10 业务工程闭环**(0905 巡检口径,9 实际目标 + #4 飞书 bot 雏形 = 10 项全完成 = #1 哲学清单 / #2 4 类资产骨架 / #5 schema / #7 工程骨架 / #8 24 条 DP / Web dp SSR / #10 4 类资产清单 v0.1 / Phase 1 #1 后端 / Phase 1 #1 前端 / **#4 飞书 bot 雏形闭环** 2026-09-05);#3 Figma OAuth / #6 设计师访谈 仍待动(纯外部沟通)
-- **Phase 1**(MVP):4/6 · **#1 资产库 4/5** 子项打勾(后端 fake-load ✓ + 前端列表页 ✓ + 32+19+73 全量回填 ✓ + 语义搜索 ✓),剩余 1 子项 Figma OAuth 真实入库
+- **Phase 0**(资产盘点):**10/10 业务工程闭环**(0905 巡检口径,9 实际目标 + #4 飞书 bot 雏形 = 10 项全完成 = #1 哲学清单 / #2 4 类资产骨架 / #5 schema / #7 工程骨架 / #8 24 条 DP / Web dp SSR / #10 4 类资产清单 v0.1 / Phase 1 #1 后端 / Phase 1 #1 前端 / **#4 飞书 bot 雏形闭环** 2026-09-05);**飞书 bot 增强 5/5 卡片化 + URL 验签 + 限流 + 切真发 smoke 工具 + 命中日志埋点全部闭环**(0906-0911 五 commit,bot/ 547 → ~1660 行);#3 Figma OAuth / #6 设计师访谈 仍待动(纯外部沟通)
+- **Phase 1**(MVP):5/6 · **#1 资产库 4/5** 子项打勾(后端 fake-load ✓ + 前端列表页 ✓ + 32+19+73 全量回填 ✓ + 语义搜索 ✓) + **#2 评审协作 v0.1 后端闭环** ✓(2026-09-12,6 端点 + 6 状态机 + 10/10 单元,后端 v0.5);剩 #1 Figma OAuth 真实入库 + #2 评审 Web 端 / 飞书通知 / SQLite 持久化
 - 详见 [[项目开发计划]]
