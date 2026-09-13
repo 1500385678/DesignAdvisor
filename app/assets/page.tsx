@@ -213,6 +213,10 @@ export default async function AssetsPage({
           <Link href="/dp" className="text-accent hover:underline">
             24 条设计哲学 →
           </Link>
+          <span className="mx-2 text-ink-50/20">|</span>
+          <Link href="/reviews" className="text-accent hover:underline">
+            评审协作 →
+          </Link>
         </p>
       </header>
 

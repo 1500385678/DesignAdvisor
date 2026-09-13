@@ -33,7 +33,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-5xl px-6 py-16">
       <header className="mb-12">
         <p className="text-sm uppercase tracking-widest text-accent">
-          DesignAdvisor · v0.3
+          DesignAdvisor · v0.6
         </p>
         <h1 className="mt-3 text-4xl font-semibold leading-tight">
           27-设计-Design Level
@@ -50,9 +50,9 @@ export default function HomePage() {
             <p className="text-xs uppercase tracking-widest text-accent">
               资产库 · Phase 1 #1 启动
             </p>
-            <h2 className="mt-2 text-xl font-medium">8 件 fake-load 资产</h2>
+            <h2 className="mt-2 text-xl font-medium">133 件资产(8 fake-load + 125 stub)</h2>
             <p className="mt-1 text-sm text-ink-50/60">
-              4 类各 2 件(组件 / 页面 / 令牌 / 参考)· 字段对齐
+              4 类(组件 32 / 页面 19 / 令牌 ~73 / 参考 9)· 字段对齐
               docs/02-schema v0.1 · 命名空间预期对齐 docs/04 资产清单
             </p>
           </div>
@@ -61,6 +61,27 @@ export default function HomePage() {
             className="rounded-lg border border-accent/40 bg-accent/20 px-5 py-2.5 text-sm font-medium text-accent transition hover:bg-accent/30"
           >
             浏览资产库 →
+          </Link>
+        </div>
+      </section>
+
+      <section className="mb-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-yellow-300">
+              评审协作 · Phase 1 #2 启动
+            </p>
+            <h2 className="mt-2 text-xl font-medium">3 件 seed 评审</h2>
+            <p className="mt-1 text-sm text-ink-50/60">
+              6 状态机 + 4 决策 + 4 优先级 · 字段对齐 docs/02-schema §6 review_id ·
+              决策日志 + 转移日志 append-only
+            </p>
+          </div>
+          <Link
+            href="/reviews"
+            className="rounded-lg border border-yellow-500/40 bg-yellow-500/15 px-5 py-2.5 text-sm font-medium text-yellow-200 transition hover:bg-yellow-500/25"
+          >
+            浏览评审 →
           </Link>
         </div>
       </section>
@@ -99,8 +120,7 @@ export default function HomePage() {
 
       <footer className="mt-16 border-t border-white/10 pt-6 text-xs text-ink-50/40">
         <p>
-          工程状态:v0.1 · Next.js 14 + Tailwind 骨架就位 · FastAPI 健康检查
-          <code className="ml-1 rounded bg-white/5 px-1.5 py-0.5">/healthz</code>
+          工程状态:v0.6 · Next.js 14 + Tailwind + FastAPI 0.5.0 · 后端模块:资产库 / 评审协作 / 飞书 bot
         </p>
         <p className="mt-1">
           详细计划见
