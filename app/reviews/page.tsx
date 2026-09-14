@@ -284,47 +284,52 @@ export default async function ReviewsPage({
                 key={r.id}
                 className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-accent/60"
               >
-                <div className="flex items-baseline justify-between gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-xs text-accent">{r.id}</span>
-                    <span
-                      className={`rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-wide ${
-                        STATUS_STYLES[r.status] ?? "border-white/10 text-ink-50/50"
-                      }`}
-                    >
-                      {STATUS_LABELS[r.status] ?? r.status}
-                    </span>
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[10px] ${
-                        PRIORITY_STYLES[r.priority] ?? "bg-white/5 text-ink-50/50"
-                      }`}
-                    >
-                      优先级 · {PRIORITY_LABELS[r.priority] ?? r.priority}
+                <Link
+                  href={`/reviews/${r.id}`}
+                  className="block"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-mono text-xs text-accent">{r.id}</span>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-wide ${
+                          STATUS_STYLES[r.status] ?? "border-white/10 text-ink-50/50"
+                        }`}
+                      >
+                        {STATUS_LABELS[r.status] ?? r.status}
+                      </span>
+                      <span
+                        className={`rounded-md px-2 py-0.5 text-[10px] ${
+                          PRIORITY_STYLES[r.priority] ?? "bg-white/5 text-ink-50/50"
+                        }`}
+                      >
+                        优先级 · {PRIORITY_LABELS[r.priority] ?? r.priority}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-ink-50/40">
+                      {new Date(r.created_at).toLocaleString("zh-CN", {
+                        hour12: false,
+                      })}
                     </span>
                   </div>
-                  <span className="text-[10px] text-ink-50/40">
-                    {new Date(r.created_at).toLocaleString("zh-CN", {
-                      hour12: false,
-                    })}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-ink-50/80">{r.title}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-ink-50/40">
-                  <span>决策 · {DECISION_LABELS[r.decision] ?? r.decision}</span>
-                  <span>评审人 · {r.reviewer_count} 位</span>
-                  {r.asset_id && (
-                    <span>
-                      关联资产 ·{" "}
-                      <code className="rounded bg-white/5 px-1 py-0.5 font-mono text-[10px] text-ink-50/60">
-                        {r.asset_id}
-                      </code>
-                    </span>
-                  )}
-                  <span>创建 · {r.created_by}</span>
-                </div>
-                <p className="mt-2 text-[10px] text-ink-50/30">
-                  详情 / 状态切换:Phase 1 #2 切第二刀 · Web 端评审详情页 v0.2(下一刀)
-                </p>
+                  <p className="mt-2 text-sm text-ink-50/80">{r.title}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-ink-50/40">
+                    <span>决策 · {DECISION_LABELS[r.decision] ?? r.decision}</span>
+                    <span>评审人 · {r.reviewer_count} 位</span>
+                    {r.asset_id && (
+                      <span>
+                        关联资产 ·{" "}
+                        <code className="rounded bg-white/5 px-1 py-0.5 font-mono text-[10px] text-ink-50/60">
+                          {r.asset_id}
+                        </code>
+                      </span>
+                    )}
+                    <span>创建 · {r.created_by}</span>
+                  </div>
+                  <p className="mt-2 text-[10px] text-ink-50/30">
+                    点击进入详情页 · 状态切换 + 决策投票(Phase 1 #2 切第三刀 Web 详情 v0.1)
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>
@@ -341,12 +346,12 @@ export default async function ReviewsPage({
           <code className="ml-1 rounded bg-white/5 px-1.5 py-0.5">
             /api/v1/reviews/summary
           </code>
-          · 后端 v0.5.0(2026-09-12)· Web 消费 v0.5 → **v0.6**(2026-09-14)
+          · 后端 v0.5.0(2026-09-12)· Web 消费 v0.5 → **v0.6**(2026-09-14)→ **v0.7**(2026-09-15,新增详情页路由)
         </p>
         <p className="mt-1">
-          不做什么(留待后续 T1-T5):评审详情页 v0.2(
-          <code>GET /{`{review_id}`}</code> + 状态切换 UI + 决策投票 UI)· 飞书通知 v0.1
-          (评审创建/状态变更 @ 飞书群)· SQLite 持久化 · 票数聚合 + 阈值通过
+          不做什么(留待后续 T1-T5):飞书通知 v0.1
+          (评审创建/状态变更 @ 飞书群 · Phase 1 #2 切第四刀)· SQLite 持久化
+          (替代内存 fake-load · 切第五刀)· 票数聚合 + 阈值通过(切第六刀)
         </p>
       </footer>
     </main>
