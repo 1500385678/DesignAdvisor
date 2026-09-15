@@ -68,6 +68,22 @@ const STATUS_STYLES: Record<string, string> = {
   archived: "border-white/5 text-ink-50/30",
 };
 
+// 决策配色(评审进度卡复用)
+const DECISION_STYLES: Record<string, string> = {
+  pending: "border-white/15 bg-white/5 text-ink-50/50",
+  approved: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+  rejected_with_reason: "border-red-500/40 bg-red-500/10 text-red-300",
+  request_changes: "border-orange-500/40 bg-orange-500/10 text-orange-300",
+};
+
+// 评审进度 4 决策固定顺序(供进度卡用)
+const DECISION_ORDER = [
+  "approved",
+  "rejected_with_reason",
+  "request_changes",
+  "pending",
+] as const;
+
 // 优先级配色
 const PRIORITY_STYLES: Record<string, string> = {
   low: "bg-white/5 text-ink-50/50",
@@ -125,6 +141,24 @@ export default async function ReviewDetailPage({
   });
 
   const legalTransitions = TRANSITIONS[review.status] ?? [];
+
+  // 评审进度:按 4 决策汇总票数(对齐 api/reviews.py DECISION enum)
+  // 同一评审人多次投票时按"最新一次"计(每人在 decisions_log 取 last)
+  const latestVoteByVoter = new Map<string, string>();
+  for (const d of review.decisions_log) {
+    latestVoteByVoter.set(d.voter, d.decision);
+  }
+  const voteCounts: Record<string, number> = {
+    pending: 0,
+    approved: 0,
+    rejected_with_reason: 0,
+    request_changes: 0,
+  };
+  for (const dec of latestVoteByVoter.values()) {
+    if (dec in voteCounts) voteCounts[dec] += 1;
+  }
+  const totalReviewers = review.reviewers.length;
+  const votedReviewers = latestVoteByVoter.size;
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
@@ -231,6 +265,50 @@ export default async function ReviewDetailPage({
             最后更新
           </p>
           <p className="mt-1 font-mono text-xs text-ink-50/70">{updatedAt}</p>
+        </div>
+      </section>
+
+      {/* 评审进度 · 4 决策票数汇总(切第六刀票数聚合阈值通过的前置视图) */}
+      <section className="mb-8 rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-[10px] uppercase tracking-widest text-ink-50/40">
+            评审进度
+          </h2>
+          <span className="text-[10px] font-mono text-ink-50/30">
+            已投 {votedReviewers} / 评审人 {totalReviewers}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {DECISION_ORDER.map((dec) => {
+            const count = voteCounts[dec] ?? 0;
+            const isCurrent = review.decision === dec;
+            return (
+              <div
+                key={dec}
+                className={`rounded-xl border p-3 text-center transition ${
+                  isCurrent
+                    ? DECISION_STYLES[dec]
+                    : "border-white/10 bg-white/[0.02] text-ink-50/40"
+                } ${isCurrent ? "ring-1 ring-accent/40" : ""}`}
+              >
+                <p className="text-[10px] uppercase tracking-wide">
+                  {DECISION_LABELS[dec] ?? dec}
+                </p>
+                <p
+                  className={`mt-1 font-mono text-2xl ${
+                    isCurrent ? "" : "text-ink-50/40"
+                  }`}
+                >
+                  {count}
+                </p>
+                {isCurrent && (
+                  <p className="mt-0.5 text-[9px] uppercase tracking-widest opacity-70">
+                    current
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
