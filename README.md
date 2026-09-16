@@ -16,6 +16,7 @@
 - T5 每日 03:00 完成小步开发并 commit + push
 
 ## 变更记录
+- v0.15(2026-09-17)· T5 · **Phase 1 #2 设计评审模块 v0.1 切第四刀 stub - 飞书评审通知 v0.1 启动**(评审协作闭环 4/5 推进):新增 `bot/notify_reviews.py` 评审飞书通知 stub(`ReviewNotifierConfig` dataclass + `from_env()` 工厂 + 3 事件 `created` / `transitioned` / `decided` + `ReviewNotifier.notify()` 统一入口 + 3 卡片渲染 `render_review_created_card` / `render_review_transitioned_card` / `render_review_decided_card` + `_card_to_text_fallback` 纯文本降级 + `__main__` CLI 调试入口;复用 `bot/card._header / _div_md / _note / _action_button` 4 件工厂保证视觉风格一致;复用 `bot/lark_client.send_text` 做底层发送;2 env 变量 `FEISHU_REVIEW_NOTIFY_ENABLED` 默认 0 / `FEISHU_REVIEW_NOTIFY_CHAT_ID` 默认空(env-gated 双保险缺一不可)) + `bot/test_notify_reviews.py` **16/16 单元** 验证通过(`TestNotifierConfig` 4 件:env 默认 / env 开但缺 chat_id / 全配 / 大小写宽容 + `TestRenderCards` 3 件:3 卡片 schema 含 msg_type + header.title + 5 elements + from/to/decision 字段 + `TestReviewNotifier` 5 件:disabled skipped / 未知 event_type error / dry_run 真发 / transitioned 真发 / decided 真发 + `TestCardToTextFallback` 3 件:3 事件纯文本降级含 URL + `test_supported_events_constant` 1 件) + `bot/__init__.py` v0.4.1 → **v0.5.0** 增列 notify_reviews 子模块 + `.env.example` 增 2 行 env 变量 + README 新增"评审飞书通知 v0.1 stub(2026-09-17 启动)"小节 + 主计划 §6 #2 checkbox 新增"飞书通知 v0.1 stub"打勾 + 项目版本 v0.14 → **v0.15**;`bot/` 从 ~1660 行 → ~1810 行(+约 150 行,新 notify_reviews.py 290 行 + test_notify_reviews.py 220 行 - 注释精简);**Phase 1 #2 评审协作推进 4/5 → 仍 4/5**(后端 v0.5 ✓ + Web 列表 v0.1 ✓ + Web 详情 v0.1 ✓ + Web 详情 v0.2 微改进 ✓ + 飞书通知 stub ✓,剩 2 子项:真实 SQLite 持久化 + 票数聚合阈值通过);**下一刀候选**:① Phase 1 #2 切第四刀完整版(api/reviews.py 6 端点 return 点埋 notify 调用 + lark_client.send_card 真发卡片)+ ② 切第五刀 SQLite 持久化(1 周可上线)+ ③ 切第六刀票数聚合阈值通过(评审进度卡已就绪为视图层前置);**0917 距 47h 周末警戒线 ~24h01m**(0916 `d75fed9` → 0917 stub = 23h59m 间隔);**0916 → 0917 间隔 23h59m** = **连续 4 日 24h 间隔内连发四刀** `e5bfa35` + `999680c` + `d75fed9` + 0917 stub
 - v0.14(2026-09-16)· T5 · **Phase 1 #2 设计评审模块 v0.1 切第三刀半 - Web 端评审详情页 v0.2 微改进(评审进度卡)**(评审协作闭环 3/5 不变 · 接续切第六刀票数聚合阈值通过的前置视图):`app/reviews/[id]/page.tsx` 元数据 section 之后插入"评审进度"小卡(纯 SSR,无 client)+ 新增 `DECISION_STYLES` 常量(4 决策配色:pending 白灰 / approved 翠绿 / rejected_with_reason 红 / request_changes 橙)+ `DECISION_ORDER` 固定顺序(approved → rejected_with_reason → request_changes → pending)+ 按 `decisions_log` 实时聚合 4 决策票数(同评审人多次投票按 latest 一次)+ 顶部右侧"已投 N / 评审人 M"参与度提示 + 当前决策用 `ring-1 ring-accent/40` 高亮 + `current` 标签,Web 端版本 v0.7 → **v0.8**;Next.js 14 构建通过 `/reviews/[id]` 路由仍 3.36 kB 不变(SSR 内联 + 零额外 JS 体积);为切第六刀"票数聚合 + 阈值通过"做视图层前置(决策汇总逻辑前端验证可行,切第六刀仅需后端按此口径增加自动 approved/rejected 阈值触发 + 飞书通知);**下一刀候选**:飞书通知 v0.1(评审创建/状态变更 @ 飞书群 · Phase 1 #2 切第四刀)+ SQLite 持久化(替代内存 fake-load · 切第五刀)+ 票数聚合 + 阈值通过(切第六刀 · 评审进度卡已就绪)+ 5 设计师 dogfood 验收(纯外部沟通)+ Phase 1 #1 Figma OAuth 真实入库(纯外部沟通)
 - v0.13(2026-09-15)· T1 · **Phase 1 #2 设计评审模块 v0.1 切第三刀 - Web 端评审详情页 v0.1**(评审协作闭环 3/5 推进):新增 `app/reviews/[id]/page.tsx` 评审详情页 SSR(消费 `GET /api/v1/reviews/{review_id}`)+ 客户端组件 `app/reviews/[id]/ReviewActions.tsx`(状态机 + 投票按钮组,消费 `PATCH /transition` + `PATCH /decision`)+ 6 状态机合法路径按 `_REVIEW_TRANSITIONS` 动态生成按钮(终态 archived 无路径)+ 4 决策按钮组(approved / rejected_with_reason / request_changes / pending)+ 投票前置校验(仅 in_review / approved / rejected 可投票)+ 决策日志 + 转移日志 append-only 时间线(倒序显示,状态/中文章/voter/actor/reason/comment 全字段)+ 评审基本信息卡(创建人 / 当前决策 / 关联资产 ID / 评审人列表 / 创建 + 更新时间)+ 列表页每条加 `<Link href="/reviews/{id}">` 跳转 + footer 文案更新(去掉"评审详情页 v0.2 下一刀"提示)+ Web 端版本 v0.6 → **v0.7**;Web 端 `app/` 1046 → ~1750 行(+约 704 行:reviews/[id]/page.tsx ~371 行 + ReviewActions.tsx ~333 行);`Phase 1 #2 评审协作推进 2/5 → 3/5`(后端 v0.5 + Web 列表 v0.1 + Web 详情 v0.1);Next.js 14 构建通过 `/reviews/[id]` 路由已注册(`ƒ Dynamic server-rendered`,3.36 kB,First Load JS 97.3 kB);**下一刀候选**:飞书通知 v0.1(评审创建/状态变更 @ 飞书群 · Phase 1 #2 切第四刀)+ SQLite 持久化(替代内存 fake-load · 切第五刀)+ 票数聚合 + 阈值通过(切第六刀)+ 5 设计师 dogfood 验收(纯外部沟通)+ Phase 1 #1 Figma OAuth 真实入库(纯外部沟通)
 - v0.12(2026-09-14)· T1 · **Phase 1 #2 设计评审模块 v0.1 切第二刀 - Web 端评审列表页 v0.1**(评审协作闭环 2/5 推进):新增 `app/reviews/page.tsx` SSR 列表页消费后端 6 端点(`/api/v1/reviews` + `/summary`)+ 6 状态计数卡(对齐 `summary.namespaces` 字段)+ `?status=` / `?priority=` 二维过滤(URL 状态可分享)+ 状态/决策/优先级中文标签映射 + 状态/优先级彩色标签(draft 灰 / in_review 黄 / approved 绿 / rejected 红 / deprecated 划线 / archived 暗;low 灰 / medium 蓝 / high 橙 / blocker 红)+ 关联资产 ID 展示(`<code>` 字体) + 评审人计数 + 时间戳本地化(中文 zh-CN + 24h 制)+ 主页 `app/page.tsx` 加"评审协作"入口卡(黄色高亮 + Phase 1 #2 启动标识)+ 资产库页加评审协作交叉链接 + 主页版本 v0.3 → **v0.6**;Web 端 `app/` 716 → ~1046 行(+约 330 行:reviews/page.tsx ~330 行);`Phase 1 #2 评审协作推进 1/5 → 2/5`(后端 v0.5 + Web 列表 v0.1);**下一刀候选**:评审详情页 v0.1(`GET /{review_id}` + decisions_log + transitions_log 时间线 + 状态切换 UI 走 PATCH /transition)+ 决策投票 UI 走 PATCH /decision + 飞书通知 v0.1(评审创建/状态变更 @ 飞书群)+ SQLite 持久化
@@ -198,6 +199,62 @@ None 归一 / 写失败不抛 / get_default_hitlog / 自动创建父目录)。
 - 单 chat_id 单消息(本轮 1 条 1 chat,无多 chat 广播)
 - 同步阻塞(无队列/重试,probe 失败直接 raise,人工介入)
 - 卡片切真发(`bot/card.py` 仍是 dry_run,卡片走 lark SDK 在 Phase 1 切)
+
+### 评审飞书通知 v0.1 stub(2026-09-17 启动)
+
+`bot/notify_reviews.py` 是 **Phase 1 #2 切第四刀** 的预热 stub —— 评审协作的"飞书通知"
+模块契约已落,3 件事件入口(env-gated,默认安全),真正的 `api/reviews.py` 6 端点埋点
++ `lark_client.send_card` 真发卡片留待切第四刀完整版接。
+
+**3 个事件入口**(对齐评审协作 3 个 PATCH/POST 触发点):
+
+| 事件 | 触发点 | 卡片模板色 | 关键字段 |
+|---|---|---|---|
+| `created` | `POST /api/v1/reviews` 成功 | blue | id / title / priority / creator / reviewers |
+| `transitioned` | `PATCH /api/v1/reviews/{id}/transition` 成功 | orange | id / from_status / to_status / last_actor |
+| `decided` | `PATCH /api/v1/reviews/{id}/decision` 成功 | green | id / decision / voter |
+
+**入口三件套**(对齐 0910 live_send 风格):
+- `ReviewNotifierConfig.from_env()` · 从 env 构造(env-gated,缺 `FEISHU_REVIEW_NOTIFY_CHAT_ID` 时 `enabled=False` 静默跳过)
+- `ReviewNotifier.from_env()` · 便利工厂
+- `notifier.notify(event_type, review, **kwargs)` · 统一入口,内部按 event_type 路由到 render → send_text → return `{ok, skipped, event_type, chat_id, send_result}`
+
+**复用既有基建**(避免重复造轮子):
+- `bot/card._header / _div_md / _note / _action_button` · 4 件工厂,保证卡片视觉风格与 0906 卡片化闭环一致
+- `bot/lark_client.send_text` · 底层发送,dry_run 复用全局 `FEISHU_BOT_DRY_RUN` 开关
+- `_PRIORITY_LABEL / _STATUS_LABEL / _DECISION_LABEL` · 3 张中文 + emoji 映射,字段口径对齐 `api/reviews.py` _REVIEW_PRIORITIES / _REVIEW_STATUSES / _REVIEW_DECISIONS
+
+**环境变量**(试运行前必读):
+- `FEISHU_REVIEW_NOTIFY_ENABLED` · 是否启用评审通知(默认 `0`,切真发前显式设 `1`)
+- `FEISHU_REVIEW_NOTIFY_CHAT_ID` · 接收通知的飞书群 `oc_xxx`(必填,未配 enabled 自动 False)
+- `FEISHU_BOT_DRY_RUN` · 复用 bot 全局 dry_run 开关(默认 `1`,真发前显式设 `0`)
+
+**试运行(默认 dry_run)**:
+```bash
+cd _DesignLib/DesignWeb
+# 1) 跑单元测试(16/16 通过,无需 env)
+python3 -m pytest bot/test_notify_reviews.py -v
+
+# 2) CLI 调试入口(无需 env,默认 enabled=False,返回 skipped=True)
+python3 -m bot.notify_reviews created
+FEISHU_REVIEW_NOTIFY_ENABLED=1 FEISHU_REVIEW_NOTIFY_CHAT_ID=oc_test_xxx \
+  python3 -m bot.notify_reviews decided decision approved voter alice
+```
+
+**不做什么(留待切第四刀完整版)**:
+- `api/reviews.py` 6 端点 return 点埋 notify 调用(本轮 stub 不接)
+- `bot/lark_client.send_card` 真发卡片(本轮走纯文本 fallback `_card_to_text_fallback`)
+- 异步队列 / 重试(本轮同步,评审事件低频,够用)
+- 卡片交互回调(URL 跳转不算,本轮只静态渲染)
+- 评审 SLA / 截止时间告警(Phase 1 #3)
+- 多群分发(不同优先级 → 不同群,本轮单群)
+
+**16/16 单元覆盖**:
+- `TestNotifierConfig`(4):env 默认关 / env 开但缺 chat_id / 全配 enabled=True / 大小写宽容 `True/true/TRUE`
+- `TestRenderCards`(3):3 卡片 msg_type + header.title + 5 elements(div×3 + note + action)
+- `TestReviewNotifier`(5):disabled → skipped / 未知 event → error / dry_run 真发 created / transitioned / decided
+- `TestCardToTextFallback`(3):3 事件纯文本降级含评审 URL
+- `test_supported_events_constant`(1):3 事件常量集合
 
 ### 设计评审模块 v0.1(2026-09-12 启动 · 切第一刀)
 
