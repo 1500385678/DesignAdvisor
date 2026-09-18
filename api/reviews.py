@@ -1,5 +1,5 @@
 """
-DesignAdvisor · 设计评审后端 v0.1 (Phase 1 #2 设计评审模块 切第一刀)
+DesignAdvisor · 设计评审后端 v0.1 (Phase 1 #2 设计评审模块 切第一刀 + 切第四刀 0920)
 
 评审数据模型 v0.1(对齐 docs/02-设计资产元数据-schema.md §6 `review_id`):
 - 每个评审独立一条记录,关联到某个资产(`asset_id` 可选,允许独立评审)
@@ -16,16 +16,23 @@ DesignAdvisor · 设计评审后端 v0.1 (Phase 1 #2 设计评审模块 切第�
 - PATCH /api/v1/reviews/{review_id}/transition  状态机转移(合法校验)
 - PATCH /api/v1/reviews/{review_id}/decision    决策变更(评审人投票)
 
+飞书通知埋点(切第四刀 0920 完整版):
+- 3 个 mutation 端点(create_review / transition_review / decide_review)return 前
+  调 `_get_notifier().notify(event_type, record, **kwargs)`,env-gated 默认安全
+- try/except 包住 notify():通知失败不阻塞主业务(返 5xx 比 200 更糟)
+- 通知模块本身 env-gated(FEISHU_REVIEW_NOTIFY_ENABLED off → skipped=True)
+- 详见 bot/notify_reviews.py v0.1 完整版
+
 不做什么(留待后续 T1-T5):
 - 真实 SQLite 持久化(Phase 1 #2 后段)
-- Web 端评审页 v0.1(Phase 1 #2 第二刀)
-- @飞书通知 / 飞书卡片评审(Phase 1 #2 第三刀)
+- @飞书通知 / 飞书卡片评审(Phase 1 #2 第三刀) - 0920 切第四刀 完整版已完成 ✓
 - 历史 changelog(评审自己的版本变化,Phase 2)
 - 评审 SLA / 截止时间(Phase 1 #3)
 """
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from datetime import datetime, timezone
@@ -33,6 +40,13 @@ from typing import Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
+
+from bot.notify_reviews import (
+    EVENT_CREATED,
+    EVENT_DECIDED,
+    EVENT_TRANSITIONED,
+    ReviewNotifier,
+)
 
 router = APIRouter(prefix="/api/v1/reviews", tags=["reviews"])
 
@@ -67,6 +81,48 @@ _REVIEW_TRANSITIONS: Dict[str, set] = {
 _ID_PATTERN = re.compile(r"^[A-Za-z0-9_:.\-]{1,80}$")
 _FAKE_LOAD_TS = datetime(2026, 9, 12, 3, 20, 0, tzinfo=timezone.utc)
 _PLACEHOLDER_USER = "feishu:placeholder"
+
+
+# ---------- 飞书通知器(lazy 单例,0920 切第四刀 完整版) ----------
+
+_notifier: Optional[ReviewNotifier] = None
+
+
+def _get_notifier() -> ReviewNotifier:
+    """lazy 初始化 notifier 单例(env-gated,FEISHU_REVIEW_NOTIFY_ENABLED off 时
+    notify() 内部直接 skipped=True 不真发)。
+
+    进程级单例:`ReviewNotifier.from_env()` 只读 env 一次,后续共用同一 config。
+    测试时可通过 `api.reviews._notifier = spy` 直接替换。
+    """
+    global _notifier
+    if _notifier is None:
+        _notifier = ReviewNotifier.from_env()
+    return _notifier
+
+
+def _safe_notify(event_type: str, record: dict, **kwargs) -> None:
+    """非阻塞包装 notify():任何异常都吞掉,记 warning,不阻塞主业务。
+
+    Args:
+        event_type: created / transitioned / decided
+        record:     /api/v1/reviews/{id} 详情 dict(transitioned 需含 last_actor)
+        **kwargs:   transitioned 需 from_status/to_status;decided 需 decision/voter
+
+    设计理由:
+    - 通知是 best-effort 副作用,失败不能让 API 返 5xx
+    - 通知器本身已 env-gated(默认 skipped=True 0 成本),这里再加 try/except 双保险
+    - 用模块 logger,运维/开发可在 logs 里看到通知失败信号
+    """
+    try:
+        _get_notifier().notify(event_type, record, **kwargs)
+    except Exception as exc:  # noqa: BLE001 - 通知边界全捕获
+        logging.getLogger(__name__).warning(
+            "review notify failed (non-blocking): event=%s id=%s err=%r",
+            event_type,
+            record.get("id", "?"),
+            exc,
+        )
 
 
 # ---------- Pydantic 请求/响应模型 ----------
@@ -322,6 +378,7 @@ def create_review(payload: ReviewCreate) -> ReviewDetail:
     - priority 4 选 1(默认 medium)
     - reviewers 飞书 user_id 列表(0-N 个)
     - 创建后 status=draft / decision=pending,需走 PATCH /transition 进 in_review
+    - 0920 切第四刀 完整版:成功后埋 notify(EVENT_CREATED, record)
     """
     if payload.priority not in _REVIEW_PRIORITIES:
         raise HTTPException(
@@ -352,6 +409,10 @@ def create_review(payload: ReviewCreate) -> ReviewDetail:
         "transitions_log": [],
     }
     _REVIEWS[new_id] = record
+
+    # 0920 切第四刀 完整版:触发飞书评审通知(created 事件)
+    _safe_notify(EVENT_CREATED, record)
+
     return _to_detail(record)
 
 
@@ -455,6 +516,8 @@ def transition_review(review_id: str, payload: ReviewTransition) -> ReviewDetail
     合法路径:
       draft → in_review → {approved, rejected} / 撤回 draft → deprecated → archived
     非法路径返回 422,不修改记录。
+    0920 切第四刀 完整版:成功后埋 notify(EVENT_TRANSITIONED, rec, from_status, to_status),
+    同时把 actor 写到 rec["last_actor"] 字段,供 render_review_transitioned_card 卡片渲染用。
     """
     _validate_id(review_id, "review_id")
     rec = _REVIEWS.get(review_id)
@@ -473,17 +536,28 @@ def transition_review(review_id: str, payload: ReviewTransition) -> ReviewDetail
         )
 
     now = _now_iso()
+    actor = _PLACEHOLDER_USER  # v0.1 暂未从请求头取 actor,后续接飞书 user_id
     rec["status"] = payload.to
     rec["updated_at"] = now
+    rec["last_actor"] = actor  # 0920 切第四刀:写 last_actor 供卡片渲染用
     rec.setdefault("transitions_log", []).append(
         {
             "from": current,
             "to": payload.to,
             "reason": payload.reason.strip(),
-            "actor": _PLACEHOLDER_USER,  # v0.1 暂未从请求头取 actor,后续接飞书 user_id
+            "actor": actor,
             "at": now,
         }
     )
+
+    # 0920 切第四刀 完整版:触发飞书评审通知(transitioned 事件)
+    _safe_notify(
+        EVENT_TRANSITIONED,
+        rec,
+        from_status=current,
+        to_status=payload.to,
+    )
+
     return _to_detail(rec)
 
 
@@ -498,6 +572,7 @@ def decide_review(review_id: str, payload: ReviewDecision) -> ReviewDetail:
     - 决策日志 append-only,记录 voter / comment / at
     - decision 字段同步更新为最新一票(简化版;Phase 1 #2 第二刀会引入"票数聚合 + 阈值通过")
     - 合法决策:pending / approved / rejected_with_reason / request_changes
+    - 0920 切第四刀 完整版:成功后埋 notify(EVENT_DECIDED, rec, decision, voter)
     """
     _validate_id(review_id, "review_id")
     rec = _REVIEWS.get(review_id)
@@ -526,4 +601,13 @@ def decide_review(review_id: str, payload: ReviewDecision) -> ReviewDetail:
             "at": now,
         }
     )
+
+    # 0920 切第四刀 完整版:触发飞书评审通知(decided 事件)
+    _safe_notify(
+        EVENT_DECIDED,
+        rec,
+        decision=payload.decision,
+        voter=payload.voter,
+    )
+
     return _to_detail(rec)

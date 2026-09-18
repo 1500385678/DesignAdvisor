@@ -1,8 +1,8 @@
 """
-DesignAdvisor · 评审飞书通知模块 (Phase 1 #2 设计评审模块 切第四刀 · v0.1 stub)
+DesignAdvisor · 评审飞书通知模块 (Phase 1 #2 设计评审模块 切第四刀 · v0.1 完整版)
 
 职责:把 `api/reviews.py` 的评审事件(创建 / 状态转移 / 决策投票)推送到飞书群,
-     复用 `bot/lark_client.send_text` 做底层发送,dry_run 模式默认开。
+     走 `bot/lark_client.send_card` 真发交互卡片,dry_run 模式默认开。
 
 事件类型(3 件,对应评审协作的 3 个 PATCH/POST 触发点):
 - "created"      评审创建(POST /api/v1/reviews 成功 → 通知评审人 + 关注群)
@@ -19,23 +19,28 @@ DesignAdvisor · 评审飞书通知模块 (Phase 1 #2 设计评审模块 切第�
 - `ReviewNotifier.from_env()`:从环境变量构造(env-gated,缺 FEISHU_REVIEW_NOTIFY_CHAT_ID
   时 `enabled=False` 静默跳过,避免试运行阶段误发)
 - `notifier.notify(event_type, review)`:3 事件统一入口,内部按 event_type 路由到
-  各自的 render → send_text → return ok/err dict
+  各自的 render → send_card → return ok/err dict
+- 调用方应 try/except 包住 notify()(本模块保证返 dict 不抛异常,但 subprocess
+  边界仍可能 raise,失败不应阻塞主业务)
 
-卡片渲染(0917 stub):本轮只出 3 件骨架渲染函数(返回 plain dict),
-  复用 `bot/card._header / _div_md / _note / _action_button` 工厂,保证视觉风格一致;
-  真正飞书卡片 schema 留待 0918+ 切第四刀补 `render_*_card()` 完整版本。
+卡片渲染(0917 stub → 0920 完整版接 send_card):
+- 3 件 render_*_card() 返回飞书 interactive 卡片 dict(envelope + card 体)
+- 复用 `bot/card._header / _div_md / _note / _action_button` 4 件工厂保证视觉风格一致
+- 0920 切换:`notify()` 内部从"render → _card_to_text_fallback → send_text"链
+  换成"render → send_card"直发(0918 `bot/lark_client.send_card` 真发卡片函数就绪)
+- 移除 _card_to_text_fallback(0917 stub,完整版不再需要纯文本降级,卡片直接发)
 
 环境变量:
 - FEISHU_REVIEW_NOTIFY_ENABLED   是否启用评审通知(默认 0;切真发前显式设 1)
 - FEISHU_REVIEW_NOTIFY_CHAT_ID   接收通知的飞书群 oc_xxx(必填,未配 enabled=False)
 - FEISHU_BOT_DRY_RUN             复用 bot lark_client 的 dry_run 开关(默认 1)
 
-不做什么(留待切第四刀完整版):
-- 真实事件埋点(api/reviews.py 6 端点返回点埋 notify 调用,本轮不接)
-- 异步队列(本轮同步调 send_text,评审事件低频,够用)
+不做什么(留待后续 T1-T5):
+- 异步队列(本轮同步调 send_card,评审事件低频,够用)
 - 卡片交互回调(URL 跳转不算,本轮只静态渲染)
 - 评审 SLA / 截止时间告警(Phase 1 #3)
 - 多群分发(不同优先级 → 不同群,本轮单群)
+- 失败 fallback send_text 链(完整版直接发卡,失败由调用方 decide 重试策略)
 """
 
 from __future__ import annotations
@@ -45,7 +50,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 from bot.card import _action_button, _div_md, _header, _note
-from bot.lark_client import send_text
+from bot.lark_client import send_card
 
 # ---------- 支持的 3 种事件类型 ----------
 
@@ -75,7 +80,7 @@ class ReviewNotifierConfig:
         return cls(enabled=enabled, chat_id=chat_id)
 
 
-# ---------- 评审卡片渲染(0917 stub) ----------
+# ---------- 评审卡片渲染(0917 stub + 0920 接 send_card 完整版) ----------
 
 # 优先级中文 + emoji 映射(对齐 api/reviews.py _REVIEW_PRIORITIES)
 _PRIORITY_LABEL = {
@@ -110,14 +115,14 @@ def _review_url(review_id: str, web_base: str = "http://127.0.0.1:3000") -> str:
 
 
 def render_review_created_card(review: Dict[str, Any]) -> Dict[str, Any]:
-    """评审创建事件卡片(0917 stub:返回 dict,内容字段齐,留待切第四刀接 lark_client.send_card)。
+    """评审创建事件卡片(对齐 bot/card.py schema,msg_type + card.header + card.elements)。
 
     Args:
         review: /api/v1/reviews/{id} 详情 dict,字段含
                 id / title / priority / status / reviewers / creator / asset_id / created_at
 
     Returns:
-        飞书 interactive card dict(对齐 bot/card.py schema,msg_type + card.header + card.elements)
+        飞书 interactive card dict,可直接喂给 `bot.lark_client.send_card`
     """
     rid = review.get("id", "?")
     title = review.get("title", "(无标题)")
@@ -141,10 +146,10 @@ def render_review_created_card(review: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def render_review_transitioned_card(review: Dict[str, Any], from_status: str, to_status: str) -> Dict[str, Any]:
-    """评审状态转移事件卡片(0917 stub)。
+    """评审状态转移事件卡片。
 
     Args:
-        review:      /api/v1/reviews/{id} 详情 dict
+        review:      /api/v1/reviews/{id} 详情 dict(需含 last_actor,否则显示 ?)
         from_status: 转移前状态(合法路径)
         to_status:   转移后状态
 
@@ -155,7 +160,7 @@ def render_review_transitioned_card(review: Dict[str, Any], from_status: str, to
     title = review.get("title", "(无标题)")
     from_lbl = _STATUS_LABEL.get(from_status, from_status)
     to_lbl = _STATUS_LABEL.get(to_status, to_status)
-    actor = review.get("last_actor", "?")  # PATCH /transition 成功后写入
+    actor = review.get("last_actor", "?")  # api/reviews.py transition_review 写入
 
     header_title = f"🔄 状态变更 · {title}"
     elements = [
@@ -172,7 +177,7 @@ def render_review_transitioned_card(review: Dict[str, Any], from_status: str, to
 
 
 def render_review_decided_card(review: Dict[str, Any], decision: str, voter: str) -> Dict[str, Any]:
-    """评审决策投票事件卡片(0917 stub)。
+    """评审决策投票事件卡片。
 
     Args:
         review:   /api/v1/reviews/{id} 详情 dict
@@ -203,7 +208,12 @@ def render_review_decided_card(review: Dict[str, Any], decision: str, voter: str
 # ---------- 通知主入口 ----------
 
 class ReviewNotifier:
-    """评审飞书通知器(env-gated,enabled=False 时所有 notify 调用返回 skipped=True)。"""
+    """评审飞书通知器(env-gated,enabled=False 时所有 notify 调用返回 skipped=True)。
+
+    完整版通知链(0920):render_*_card() → bot.lark_client.send_card() → return dict
+    - 移除 _card_to_text_fallback 纯文本降级(0917 stub 弃用)
+    - 失败处理:send_card 内部返 ok=False 的 dict(不 raise),调用方按 send_result 处理
+    """
 
     def __init__(self, config: Optional[ReviewNotifierConfig] = None):
         self.config = config or ReviewNotifierConfig.from_env()
@@ -219,19 +229,19 @@ class ReviewNotifier:
         review: Dict[str, Any],
         **kwargs: Any,
     ) -> Dict[str, Any]:
-        """统一入口:3 事件 → render 卡片 → send_text → return 结果 dict。
+        """统一入口:3 事件 → render 卡片 → send_card → return 结果 dict。
 
         Args:
             event_type: "created" | "transitioned" | "decided"
-            review:     /api/v1/reviews/{id} 详情 dict
+            review:     /api/v1/reviews/{id} 详情 dict(transitioned 需含 last_actor)
             **kwargs:   transitioned 需 from_status/to_status;decided 需 decision/voter
 
         Returns:
             dict: {"ok": bool, "skipped": bool, "event_type": str, "chat_id": str,
-                   "send_result": dict | None}
+                   "send_result": dict | None, "reason"?: str, "error"?: str}
             - enabled=False → ok=True, skipped=True(默认安全)
             - 未知 event_type → ok=False, skipped=False, error="unknown event_type"
-            - send_text 失败 → ok=False, send_result={...}
+            - send_card 失败 → ok=False, send_result={ok: False, ...}
         """
         if not self.config.enabled:
             return {
@@ -269,9 +279,8 @@ class ReviewNotifier:
                 voter=kwargs.get("voter", ""),
             )
 
-        # 卡片序列化 + 走 send_text(0917 stub:卡片暂以纯文本 fallback,留待切第四刀接 send_card)
-        text = _card_to_text_fallback(card, event_type, review, kwargs)
-        send_result = send_text(self.config.chat_id, text)
+        # 0920 完整版:直发卡片,不再走纯文本 fallback
+        send_result = send_card(self.config.chat_id, card)
 
         return {
             "ok": bool(send_result.get("ok")),
@@ -280,59 +289,6 @@ class ReviewNotifier:
             "chat_id": self.config.chat_id,
             "send_result": send_result,
         }
-
-
-def _card_to_text_fallback(
-    card: Dict[str, Any],
-    event_type: str,
-    review: Dict[str, Any],
-    kwargs: Dict[str, Any],
-) -> str:
-    """把卡片降级为 send_text 的纯文本(0917 stub 用,留待切第四刀接 lark_client.send_card 真发卡片)。
-
-    Args:
-        card:       本模块 render_*_card 返回的 dict
-        event_type: created / transitioned / decided
-        review:     评审详情
-        kwargs:     透传给 render 的额外参数
-
-    Returns:
-        适合飞书纯文本消息的字符串(title + body + 链接)
-    """
-    rid = review.get("id", "?")
-    title = review.get("title", "(无标题)")
-    url = _review_url(rid)
-
-    if event_type == EVENT_CREATED:
-        priority = _PRIORITY_LABEL.get(review.get("priority", ""), review.get("priority", ""))
-        reviewers = review.get("reviewers", []) or []
-        reviewer_str = ", ".join(reviewers) if reviewers else "(未指定)"
-        return (
-            f"📥 新评审 · {title}\n"
-            f"评审 ID {rid} · {priority}\n"
-            f"发起人 {review.get('creator', '?')}\n"
-            f"评审人 {reviewer_str}\n"
-            f"🔗 {url}"
-        )
-    if event_type == EVENT_TRANSITIONED:
-        from_lbl = _STATUS_LABEL.get(kwargs.get("from_status", ""), kwargs.get("from_status", ""))
-        to_lbl = _STATUS_LABEL.get(kwargs.get("to_status", ""), kwargs.get("to_status", ""))
-        return (
-            f"🔄 状态变更 · {title}\n"
-            f"评审 ID {rid}\n"
-            f"{from_lbl} → {to_lbl}\n"
-            f"操作人 {review.get('last_actor', '?')}\n"
-            f"🔗 {url}"
-        )
-    # EVENT_DECIDED
-    decision_lbl = _DECISION_LABEL.get(kwargs.get("decision", ""), kwargs.get("decision", ""))
-    return (
-        f"🗳 新投票 · {title}\n"
-        f"评审 ID {rid}\n"
-        f"投票人 {kwargs.get('voter', '?')}\n"
-        f"决策 {decision_lbl}\n"
-        f"🔗 {url}"
-    )
 
 
 # ---------- CLI 调试入口 ----------

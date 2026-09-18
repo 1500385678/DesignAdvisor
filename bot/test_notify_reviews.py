@@ -1,15 +1,21 @@
 """
-DesignAdvisor · 评审飞书通知模块 单元测试 (0917 stub)
+DesignAdvisor · 评审飞书通知模块 单元测试 (0920 切第四刀 完整版)
 
 覆盖:
 - ReviewNotifierConfig.from_env 4 件套(env off / on 但缺 chat_id / on 全配 / on true 大小写)
 - render_review_created_card / render_review_transitioned_card / render_review_decided_card
   三件卡片 schema 校验(msg_type + card.header + card.elements + 5 elements 段)
-- ReviewNotifier 4 路径(notify disabled → skipped / notify unknown event → error /
-  notify created with dry_run → ok=True dry_run / notify transitioned with chat_id → ok=True)
-- _card_to_text_fallback 三事件纯文本降级(created / transitioned / decided)
+- ReviewNotifier 5 路径(notify disabled → skipped / notify unknown event → error /
+  notify created with dry_run → ok=True dry_run / notify transitioned with chat_id → ok=True /
+  notify decided with chat_id → ok=True)
+- 0920 新增:verify send_card 真发路径(补丁 send_card,断言被调 1 次,返回 dict 含 msg_type=interactive)
 
 跑法:cd _DesignLib/DesignWeb && python -m pytest bot/test_notify_reviews.py -v
+
+变更(0920 vs 0917):
+- 移除 _card_to_text_fallback 纯文本降级相关测试(TestCardToTextFallback 整段删)
+- TestReviewNotifier 测试 mock 目标从 send_text 改成 send_card
+- 新增 test_notify_sends_card_not_text 验证走 send_card 路径(0920 完整版契约)
 """
 
 from __future__ import annotations
@@ -26,7 +32,6 @@ from bot.notify_reviews import (
     SUPPORTED_EVENTS,
     ReviewNotifier,
     ReviewNotifierConfig,
-    _card_to_text_fallback,
     render_review_created_card,
     render_review_decided_card,
     render_review_transitioned_card,
@@ -119,7 +124,7 @@ class TestRenderCards:
         assert len(elements) == 5
 
 
-# ---------- ReviewNotifier.notify 4 路径 ----------
+# ---------- ReviewNotifier.notify 5 路径(0920 切第四刀 完整版) ----------
 
 class TestReviewNotifier:
     def _make_review(self) -> dict:
@@ -134,116 +139,125 @@ class TestReviewNotifier:
         }
 
     def test_notify_disabled_skipped(self, monkeypatch):
-        """enabled=False → skipped=True, 不调 send_text。"""
+        """enabled=False → skipped=True, 不调 send_card。"""
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "0")
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_x")
         notifier = ReviewNotifier.from_env()
-        result = notifier.notify(EVENT_CREATED, self._make_review())
+        with patch("bot.notify_reviews.send_card") as mock_send:
+            result = notifier.notify(EVENT_CREATED, self._make_review())
         assert result["ok"] is True
         assert result["skipped"] is True
         assert result["event_type"] == EVENT_CREATED
         assert result["send_result"] is None
+        mock_send.assert_not_called()
 
     def test_notify_unknown_event_error(self, monkeypatch):
-        """未知 event_type → ok=False + error 描述, 不调 send_text。"""
+        """未知 event_type → ok=False + error 描述, 不调 send_card。"""
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "1")
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_x")
         notifier = ReviewNotifier.from_env()
-        result = notifier.notify("bogus_event", self._make_review())
+        with patch("bot.notify_reviews.send_card") as mock_send:
+            result = notifier.notify("bogus_event", self._make_review())
         assert result["ok"] is False
         assert result["skipped"] is False
         assert "unknown event_type" in result["error"]
         assert "bogus_event" in result["error"]
+        mock_send.assert_not_called()
 
-    def test_notify_created_with_dry_run(self, monkeypatch):
-        """enabled=True + dry_run=1 → send_text 返回 ok=True dry_run=True,notifier 转 ok。"""
+    def test_notify_created_sends_card(self, monkeypatch):
+        """enabled=True + dry_run=1 → send_card 返 ok=True dry_run=True, notifier 转 ok。
+
+        0920 切第四刀 完整版契约:notify() 内部走 send_card 路径(不再是 send_text)。
+        """
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "1")
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_dryrun_xxx")
         monkeypatch.setenv("FEISHU_BOT_DRY_RUN", "1")
         notifier = ReviewNotifier.from_env()
-        result = notifier.notify(EVENT_CREATED, self._make_review())
+        with patch(
+            "bot.notify_reviews.send_card",
+            return_value={"ok": True, "dry_run": True, "stdout": "(dry_run)", "stderr": "", "returncode": 0},
+        ) as mock_send:
+            result = notifier.notify(EVENT_CREATED, self._make_review())
         assert result["ok"] is True
         assert result["skipped"] is False
         assert result["chat_id"] == "oc_dryrun_xxx"
-        # send_result 由 send_text 内部 dry_run 返回
+        # 0920 关键断言:send_card 被调 1 次,且 chat_id 正确,card_dict 是 created 卡片
+        mock_send.assert_called_once()
+        call_args = mock_send.call_args
+        assert call_args.args[0] == "oc_dryrun_xxx"
+        card_dict = call_args.args[1]
+        assert card_dict["msg_type"] == "interactive"
+        # 渲染 created 卡片,header.template=blue
+        assert card_dict["card"]["header"]["template"] == "blue"
+        # send_result 由 send_card 内部 dry_run 返回
         assert result["send_result"]["dry_run"] is True
 
-    def test_notify_transitioned_sends(self, monkeypatch):
-        """enabled=True + transitioned 事件 → 走 send_text 文本降级 + 含 from/to 文案。"""
+    def test_notify_transitioned_sends_card(self, monkeypatch):
+        """enabled=True + transitioned 事件 → send_card 调 1 次,card 是 orange 模板。"""
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "1")
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_tx_xxx")
         monkeypatch.setenv("FEISHU_BOT_DRY_RUN", "1")
         notifier = ReviewNotifier.from_env()
-        result = notifier.notify(
-            EVENT_TRANSITIONED,
-            self._make_review(),
-            from_status="draft",
-            to_status="in_review",
-        )
+        with patch(
+            "bot.notify_reviews.send_card",
+            return_value={"ok": True, "dry_run": True, "stdout": "", "stderr": "", "returncode": 0},
+        ) as mock_send:
+            result = notifier.notify(
+                EVENT_TRANSITIONED,
+                self._make_review(),
+                from_status="draft",
+                to_status="in_review",
+            )
         assert result["ok"] is True
         assert result["event_type"] == EVENT_TRANSITIONED
         assert result["send_result"]["dry_run"] is True
+        mock_send.assert_called_once()
+        # 校验卡片 header 模板(transitioned 用 orange)
+        card_dict = mock_send.call_args.args[1]
+        assert card_dict["card"]["header"]["template"] == "orange"
 
-    def test_notify_decided_sends(self, monkeypatch):
-        """enabled=True + decided 事件 → 走 send_text 文本降级 + 含决策文案。"""
+    def test_notify_decided_sends_card(self, monkeypatch):
+        """enabled=True + decided 事件 → send_card 调 1 次,card 是 green 模板。"""
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "1")
         monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_de_xxx")
         monkeypatch.setenv("FEISHU_BOT_DRY_RUN", "1")
         notifier = ReviewNotifier.from_env()
-        result = notifier.notify(
-            EVENT_DECIDED,
-            self._make_review(),
-            decision="approved",
-            voter="alice",
-        )
+        with patch(
+            "bot.notify_reviews.send_card",
+            return_value={"ok": True, "dry_run": True, "stdout": "", "stderr": "", "returncode": 0},
+        ) as mock_send:
+            result = notifier.notify(
+                EVENT_DECIDED,
+                self._make_review(),
+                decision="approved",
+                voter="alice",
+            )
         assert result["ok"] is True
         assert result["event_type"] == EVENT_DECIDED
         assert result["send_result"]["dry_run"] is True
+        mock_send.assert_called_once()
+        # 校验卡片 header 模板(decided 用 green)
+        card_dict = mock_send.call_args.args[1]
+        assert card_dict["card"]["header"]["template"] == "green"
 
+    def test_notify_sends_card_not_text(self, monkeypatch):
+        """0920 切第四刀 关键回归:enabled=True 时 notify() 调 send_card,绝不走 send_text。
 
-# ---------- _card_to_text_fallback 3 事件 ----------
-
-class TestCardToTextFallback:
-    def _review(self) -> dict:
-        return {
-            "id": "rev_fb_001",
-            "title": "评审降级纯文本测试",
-            "priority": "low",
-            "status": "draft",
-            "creator": "zhangyong",
-            "reviewers": ["alice", "bob", "carol"],
-        }
-
-    def test_created_text(self):
-        text = _card_to_text_fallback({}, EVENT_CREATED, self._review(), {})
-        assert "📥 新评审" in text
-        assert "评审 ID rev_fb_001" in text
-        assert "🟢 低" in text
-        assert "alice, bob, carol" in text
-        assert "🔗 http://127.0.0.1:3000/reviews/rev_fb_001" in text
-
-    def test_transitioned_text(self):
-        review = {**self._review(), "last_actor": "alice"}
-        text = _card_to_text_fallback(
-            {},
-            EVENT_TRANSITIONED,
-            review,
-            {"from_status": "draft", "to_status": "in_review"},
-        )
-        assert "🔄 状态变更" in text
-        assert "📝 草稿 → 👀 评审中" in text
-        assert "操作人 alice" in text
-
-    def test_decided_text(self):
-        text = _card_to_text_fallback(
-            {},
-            EVENT_DECIDED,
-            self._review(),
-            {"decision": "request_changes", "voter": "bob"},
-        )
-        assert "🗳 新投票" in text
-        assert "投票人 bob" in text
-        assert "决策 🔁 需要修改" in text
+        防御性测试:即便 send_text 在 bot.lark_client 仍存在,notify() 内部也不会调它。
+        """
+        monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_ENABLED", "1")
+        monkeypatch.setenv("FEISHU_REVIEW_NOTIFY_CHAT_ID", "oc_def_xxx")
+        notifier = ReviewNotifier.from_env()
+        with patch(
+            "bot.notify_reviews.send_card",
+            return_value={"ok": True, "dry_run": True, "stdout": "", "stderr": "", "returncode": 0},
+        ) as mock_card, patch(
+            "bot.lark_client.send_text",
+            return_value={"ok": True, "dry_run": True, "stdout": "", "stderr": "", "returncode": 0},
+        ) as mock_text:
+            notifier.notify(EVENT_CREATED, self._make_review())
+        mock_card.assert_called_once()
+        mock_text.assert_not_called()
 
 
 # ---------- 顶层常量 ----------
