@@ -201,11 +201,16 @@ None 归一 / 写失败不抛 / get_default_hitlog / 自动创建父目录)。
 - 同步阻塞(无队列/重试,probe 失败直接 raise,人工介入)
 - 卡片切真发(`bot/card.py` 仍是 dry_run,卡片走 lark SDK 在 Phase 1 切)
 
-### 评审飞书通知 v0.1 stub(2026-09-17 启动)
+### 评审飞书通知 v0.1 完整版(2026-09-19 闭环 · 切第四刀)
 
-`bot/notify_reviews.py` 是 **Phase 1 #2 切第四刀** 的预热 stub —— 评审协作的"飞书通知"
-模块契约已落,3 件事件入口(env-gated,默认安全),真正的 `api/reviews.py` 6 端点埋点
-+ `lark_client.send_card` 真发卡片留待切第四刀完整版接。
+`bot/notify_reviews.py` 是 **Phase 1 #2 切第四刀** 的评审协作飞书通知模块 ——
+
+- **2026-09-17 启动 stub**:3 件事件入口(env-gated,默认安全)契约就位,`api/reviews.py` 6 端点埋点 +
+  `lark_client.send_card` 真发卡片留待完整版接
+- **2026-09-18 接力**:`bot/lark_client.py` `send_card(chat_id, card_dict)` 函数落地(`--msg-type interactive`
+  + `--content <card_json>`),`send_text` / `send_card` 双函数关系成对
+- **2026-09-19 闭环**:3 mutation 端点 return 前埋点 + `notify()` 内部从"render → `_card_to_text_fallback`
+  → `send_text`"链换成"render → `send_card`"直发,移除 `_card_to_text_fallback` 纯文本降级
 
 **3 个事件入口**(对齐评审协作 3 个 PATCH/POST 触发点):
 
@@ -218,44 +223,71 @@ None 归一 / 写失败不抛 / get_default_hitlog / 自动创建父目录)。
 **入口三件套**(对齐 0910 live_send 风格):
 - `ReviewNotifierConfig.from_env()` · 从 env 构造(env-gated,缺 `FEISHU_REVIEW_NOTIFY_CHAT_ID` 时 `enabled=False` 静默跳过)
 - `ReviewNotifier.from_env()` · 便利工厂
-- `notifier.notify(event_type, review, **kwargs)` · 统一入口,内部按 event_type 路由到 render → send_text → return `{ok, skipped, event_type, chat_id, send_result}`
+- `notifier.notify(event_type, review, **kwargs)` · 统一入口,内部按 event_type 路由到 render → send_card → return `{ok, skipped, event_type, chat_id, send_result}`
+
+**端点埋点链路**(Phase 1 #2 切第四刀 完整版新增):
+- `api/reviews._notifier` · lazy 单例,`_get_notifier()` 工厂,测试时可显式替换 `_notifier = spy`
+- `api/reviews._safe_notify(event_type, record, **kwargs)` · 非阻塞包装,try/except 全捕获 → `log.warning(...)`,通知失败绝不阻塞主业务(返 5xx 比 200 更糟)
+- 3 mutation 端点 return 前埋点(非 422 路径):
+  - `POST /reviews` → `notify(EVENT_CREATED, record)`
+  - `PATCH /reviews/{id}/transition` 写 `rec["last_actor"]` 后 → `notify(EVENT_TRANSITIONED, rec, from_status=current, to_status=payload.to)`
+  - `PATCH /reviews/{id}/decision` → `notify(EVENT_DECIDED, rec, decision=payload.decision, voter=payload.voter)`
 
 **复用既有基建**(避免重复造轮子):
 - `bot/card._header / _div_md / _note / _action_button` · 4 件工厂,保证卡片视觉风格与 0906 卡片化闭环一致
-- `bot/lark_client.send_text` · 底层发送,dry_run 复用全局 `FEISHU_BOT_DRY_RUN` 开关
+- `bot/lark_client.send_card` · 0918 新增的卡片真发函数,内部透传 `card_dict["msg_type"]` 给 `--msg-type` + `card_dict["card"]` 序列化为 `--content`
 - `_PRIORITY_LABEL / _STATUS_LABEL / _DECISION_LABEL` · 3 张中文 + emoji 映射,字段口径对齐 `api/reviews.py` _REVIEW_PRIORITIES / _REVIEW_STATUSES / _REVIEW_DECISIONS
 
 **环境变量**(试运行前必读):
 - `FEISHU_REVIEW_NOTIFY_ENABLED` · 是否启用评审通知(默认 `0`,切真发前显式设 `1`)
 - `FEISHU_REVIEW_NOTIFY_CHAT_ID` · 接收通知的飞书群 `oc_xxx`(必填,未配 enabled 自动 False)
 - `FEISHU_BOT_DRY_RUN` · 复用 bot 全局 dry_run 开关(默认 `1`,真发前显式设 `0`)
+- `LARK_PROFILE` · lark-cli profile 名(默认 `design`,对齐 0910 live_send)
 
 **试运行(默认 dry_run)**:
 ```bash
 cd _DesignLib/DesignWeb
-# 1) 跑单元测试(16/16 通过,无需 env)
-python3 -m pytest bot/test_notify_reviews.py -v
+# 1) 跑单元测试(20/20 通过,无需 env)
+#    - bot/test_notify_reviews.py 14 单元(re-mock send_card + send_card_not_text 关键回归)
+#    - api/test_reviews_notify.py 6 单元(SpyNotifier 替换 _notifier 单例 + ExplodingNotifier 非阻塞契约)
+python3 -m pytest bot/test_notify_reviews.py api/test_reviews_notify.py -v
 
 # 2) CLI 调试入口(无需 env,默认 enabled=False,返回 skipped=True)
 python3 -m bot.notify_reviews created
 FEISHU_REVIEW_NOTIFY_ENABLED=1 FEISHU_REVIEW_NOTIFY_CHAT_ID=oc_test_xxx \
   python3 -m bot.notify_reviews decided decision approved voter alice
+
+# 3) 端到端埋点验证:启动 uvicorn + POST /reviews 观察 notify 触发
+FEISHU_REVIEW_NOTIFY_ENABLED=1 FEISHU_REVIEW_NOTIFY_CHAT_ID=oc_test_xxx \
+  FEISHU_BOT_DRY_RUN=1 python3 -m api.main &
+curl -s -X POST http://127.0.0.1:8000/api/v1/reviews \
+  -H 'content-type: application/json' \
+  -d '{"title":"试运行评审","priority":"medium","created_by":"feishu:owner-design","reviewers":["feishu:owner-design"]}' | jq
+# 期望看到 stdout 打印 lark-cli send_card 命令形状(走 dry_run)
 ```
 
-**不做什么(留待切第四刀完整版)**:
-- `api/reviews.py` 6 端点 return 点埋 notify 调用(本轮 stub 不接)
-- `bot/lark_client.send_card` 真发卡片(本轮走纯文本 fallback `_card_to_text_fallback`)
+**不做什么(留待后续 T1-T5)**:
+- 真实 SQLite 持久化(Phase 1 #2 切第五刀,当前仍是内存 fake-load,重启数据丢)
+- 票数聚合 + 阈值通过(Phase 1 #2 切第六刀,当前每条决策独立投票,前端评审进度卡已就绪)
 - 异步队列 / 重试(本轮同步,评审事件低频,够用)
 - 卡片交互回调(URL 跳转不算,本轮只静态渲染)
 - 评审 SLA / 截止时间告警(Phase 1 #3)
 - 多群分发(不同优先级 → 不同群,本轮单群)
 
-**16/16 单元覆盖**:
-- `TestNotifierConfig`(4):env 默认关 / env 开但缺 chat_id / 全配 enabled=True / 大小写宽容 `True/true/TRUE`
-- `TestRenderCards`(3):3 卡片 msg_type + header.title + 5 elements(div×3 + note + action)
-- `TestReviewNotifier`(5):disabled → skipped / 未知 event → error / dry_run 真发 created / transitioned / decided
-- `TestCardToTextFallback`(3):3 事件纯文本降级含评审 URL
-- `test_supported_events_constant`(1):3 事件常量集合
+**20/20 单元覆盖**(跨 2 文件):
+- `bot/test_notify_reviews.py`(14 单元):
+  - `TestNotifierConfig`(4):env 默认关 / env 开但缺 chat_id / 全配 enabled=True / 大小写宽容 `True/true/TRUE`
+  - `TestRenderCards`(3):3 卡片 msg_type + header.title + 5 elements(div×3 + note + action)
+  - `TestReviewNotifier`(5):disabled → skipped / 未知 event → error / dry_run 真发 created / transitioned / decided
+  - `test_notify_sends_card_not_text`(1):关键回归 — enabled=True 时 `send_card` 被调 1 次,`send_text` 不被调
+  - `test_supported_events_constant`(1):3 事件常量集合
+- `api/test_reviews_notify.py`(6 单元,SpyNotifier 替换 `_notifier` 单例):
+  - POST 201 → 1 `notify(EVENT_CREATED)`
+  - PATCH transition 200 → 1 `notify(EVENT_TRANSITIONED, from_status=draft, to_status=in_review)`
+  - PATCH transition 422 → 0 notify
+  - PATCH decision 200 → 1 `notify(EVENT_DECIDED, decision=approved, voter=feishu:owner-design)`
+  - PATCH decision 422 → 0 notify
+  - `ExplodingNotifier` raise → POST 仍 201(非阻塞契约)
 
 ### 设计评审模块 v0.1(2026-09-12 启动 · 切第一刀)
 
